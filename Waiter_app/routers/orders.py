@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, ValidationError, field_validator
 from typing import Optional, List, Annotated
 from db import get_db
