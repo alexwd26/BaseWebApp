@@ -11,15 +11,35 @@ class OrderRequest(BaseModel):
     table_number: Optional[int] = None
     address: Optional[str] = None
     items: str
+    role: Optional[str] = None  # added for frontend auth
 
 class OrderStatusUpdate(BaseModel):
     status: str  # 'pending', 'kitchen', 'ready', 'complete'
     role: Optional[str] = None  # added for frontend auth
 
+def get_max_tables():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT value FROM settings WHERE name = 'max_tables'")
+    result = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return int(result[0]) if result else 20
+
 @router.post("/", status_code=201)
 def create_order(order: OrderRequest):
     if order.order_type not in ["dine-in", "delivery", "takeout"]:
         raise HTTPException(status_code=400, detail="Invalid order type")
+
+    if order.role not in ["admin", "waiter", "customer"]:
+        raise HTTPException(status_code=403, detail="Only admin, waiter, or customer can place an order")
+
+    if order.order_type == "dine-in":
+        if order.table_number is None:
+            raise HTTPException(status_code=400, detail="Table number is required for dine-in")
+        max_tables = get_max_tables()
+        if order.table_number < 1 or order.table_number > max_tables:
+            raise HTTPException(status_code=400, detail=f"Table number must be between 1 and {max_tables}")
 
     conn = get_db()
     cursor = conn.cursor()
