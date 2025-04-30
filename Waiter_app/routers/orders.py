@@ -1,14 +1,12 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional, List
 from db import get_db
-import jwt
 import datetime
 
 router = APIRouter()
 
-SECRET_KEY = "your-secret-key"
-ALGORITHM = "HS256"
+
 
 class OrderRequest(BaseModel):
     order_type: str  # 'dine-in', 'delivery', 'takeout'
@@ -16,17 +14,11 @@ class OrderRequest(BaseModel):
     address: Optional[str] = None
     items: str
 
+
 class OrderStatusUpdate(BaseModel):
     status: str  # 'pending', 'kitchen', 'ready', 'complete'
 
-def get_current_user(token: str) -> dict:
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
+
 
 @router.post("/", status_code=201)
 def create_order(order: OrderRequest):
@@ -35,17 +27,17 @@ def create_order(order: OrderRequest):
     if order.order_type == "dine-in":
         cursor.execute(
             "INSERT INTO orders (order_type, table_number, items, status) VALUES (%s, %s, %s, %s)",
-            (order.order_type, order.table_number, order.items, "pending")
+            (order.order_type, order.table_number, order.items, "pending"),
         )
     elif order.order_type == "delivery":
         cursor.execute(
             "INSERT INTO orders (order_type, address, items, status) VALUES (%s, %s, %s, %s)",
-            (order.order_type, order.address, order.items, "pending")
+            (order.order_type, order.address, order.items, "pending"),
         )
     elif order.order_type == "takeout":
         cursor.execute(
             "INSERT INTO orders (order_type, items, status) VALUES (%s, %s, %s)",
-            (order.order_type, order.items, "pending")
+            (order.order_type, order.items, "pending"),
         )
     else:
         raise HTTPException(status_code=400, detail="Invalid order type")
@@ -56,6 +48,8 @@ def create_order(order: OrderRequest):
     conn.close()
 
     return {"order_id": order_id, "message": "Order placed successfully"}
+
+
 
 @router.get("/{order_id}")
 def get_order_by_id(order_id: int):
@@ -69,8 +63,12 @@ def get_order_by_id(order_id: int):
         raise HTTPException(status_code=404, detail="Order not found")
     return order
 
+
+
 @router.get("/")
-def list_orders(order_type: Optional[str] = None, status: Optional[str] = None):
+def list_orders(
+    order_type: Optional[str] = None, status: Optional[str] = None
+):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
 
@@ -96,15 +94,15 @@ def list_orders(order_type: Optional[str] = None, status: Optional[str] = None):
     conn.close()
     return orders
 
-@router.patch("/{order_id}")
-def update_order_status(order_id: int, update: OrderStatusUpdate, token: str = Depends(get_current_user)):
-    role = token.get("role")
-    if role not in ["admin", "motoboy"]:
-        raise HTTPException(status_code=403, detail="Only admin or motoboy can update order status")
 
+
+@router.patch("/{order_id}")
+def update_order_status(order_id: int, update: OrderStatusUpdate):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("UPDATE orders SET status = %s WHERE id = %s", (update.status, order_id))
+    cursor.execute(
+        "UPDATE orders SET status = %s WHERE id = %s", (update.status, order_id)
+    )
     conn.commit()
     cursor.close()
     conn.close()

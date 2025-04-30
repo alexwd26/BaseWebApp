@@ -1,13 +1,10 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Query
 from pydantic import BaseModel
 from typing import Optional, List
 from db import get_db
-import jwt
 
 router = APIRouter()
 
-SECRET_KEY = "your-secret-key"
-ALGORITHM = "HS256"
 
 class MenuItem(BaseModel):
     name: str
@@ -15,15 +12,11 @@ class MenuItem(BaseModel):
     price: float
     category: str
 
+
 class MenuItemOut(MenuItem):
     id: int
 
-def get_current_user_role(token: str) -> str:
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload.get("role")
-    except:
-        raise HTTPException(status_code=401, detail="Invalid or missing token")
+
 
 @router.get("/", response_model=List[MenuItemOut])
 def list_menu_items(category: Optional[str] = Query(None)):
@@ -38,6 +31,8 @@ def list_menu_items(category: Optional[str] = Query(None)):
     conn.close()
     return items
 
+
+
 @router.get("/{item_id}", response_model=MenuItemOut)
 def get_menu_item(item_id: int):
     conn = get_db()
@@ -50,16 +45,15 @@ def get_menu_item(item_id: int):
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
-@router.post("/", response_model=MenuItemOut)
-def create_menu_item(item: MenuItem, token: str = Depends(get_current_user_role)):
-    if token != "admin":
-        raise HTTPException(status_code=403, detail="Only admins can add items")
 
+
+@router.post("/", response_model=MenuItemOut)
+def create_menu_item(item: MenuItem):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(
         "INSERT INTO menu_items (name, description, price, category) VALUES (%s, %s, %s, %s)",
-        (item.name, item.description, item.price, item.category)
+        (item.name, item.description, item.price, item.category),
     )
     conn.commit()
     item_id = cursor.lastrowid
@@ -67,27 +61,25 @@ def create_menu_item(item: MenuItem, token: str = Depends(get_current_user_role)
     conn.close()
     return {"id": item_id, **item.dict()}
 
-@router.put("/{item_id}", response_model=MenuItemOut)
-def update_menu_item(item_id: int, item: MenuItem, token: str = Depends(get_current_user_role)):
-    if token != "admin":
-        raise HTTPException(status_code=403, detail="Only admins can update items")
 
+
+@router.put("/{item_id}", response_model=MenuItemOut)
+def update_menu_item(item_id: int, item: MenuItem):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(
         "UPDATE menu_items SET name=%s, description=%s, price=%s, category=%s WHERE id=%s",
-        (item.name, item.description, item.price, item.category, item_id)
+        (item.name, item.description, item.price, item.category, item_id),
     )
     conn.commit()
     cursor.close()
     conn.close()
     return {"id": item_id, **item.dict()}
 
-@router.delete("/{item_id}")
-def delete_menu_item(item_id: int, token: str = Depends(get_current_user_role)):
-    if token != "admin":
-        raise HTTPException(status_code=403, detail="Only admins can delete items")
 
+
+@router.delete("/{item_id}")
+def delete_menu_item(item_id: int):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("DELETE FROM menu_items WHERE id=%s", (item_id,))
@@ -95,6 +87,7 @@ def delete_menu_item(item_id: int, token: str = Depends(get_current_user_role)):
     cursor.close()
     conn.close()
     return {"message": "Item deleted"}
+
 
 
 @router.get("/", response_model=List[MenuItem])
@@ -107,6 +100,7 @@ def get_menu_items():
     conn.close()
     return items
 
+
 @router.get("/ping")
 def ping_server():
     try:
@@ -118,3 +112,7 @@ def ping_server():
         return {"status": "ok"}
     except Exception as e:
         return {"status": "error", "details": str(e)}
+        
+
+app = FastAPI()
+app.include_router(router)
