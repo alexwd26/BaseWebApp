@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+mysql-connector-python
+kafka-python
+passlib[bcrypt]
+python-jose
+pydantic
+python-dotenv
+aiofiles
+python-jose
