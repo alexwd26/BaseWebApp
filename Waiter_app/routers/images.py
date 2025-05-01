@@ -2,6 +2,8 @@ from fastapi import APIRouter, File, UploadFile, HTTPException
 from fastapi.responses import FileResponse
 import shutil
 import os
+from routers.menus import MenuItem
+
 
 router = APIRouter()
 
