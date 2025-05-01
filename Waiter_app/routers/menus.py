@@ -1,9 +1,14 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Query, UploadFile, File, Form
 from pydantic import BaseModel
 from typing import Optional, List
 from db import get_db
+import os
+import shutil
 
 router = APIRouter()
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 class MenuItem(BaseModel):
     name: str
@@ -14,6 +19,7 @@ class MenuItem(BaseModel):
 
 class MenuItemOut(MenuItem):
     id: int
+    image: Optional[str] = None
 
 @router.get("/", response_model=List[MenuItemOut])
 def list_menu_items(category: Optional[str] = Query(None)):
@@ -53,6 +59,31 @@ def create_menu_item(item: MenuItem):
     cursor.close()
     conn.close()
     return {"id": item_id, **item.dict()}
+
+@router.post("/register-item")
+def register_item(
+    name: str = Form(...),
+    description: str = Form(""),
+    price: float = Form(...),
+    category: str = Form(...),
+    image: UploadFile = File(...)
+):
+    file_path = os.path.join(UPLOAD_DIR, image.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO menu_items (name, description, price, category, image) VALUES (%s, %s, %s, %s, %s)",
+        (name, description, price, category, image.filename)
+    )
+    conn.commit()
+    item_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+
+    return {"id": item_id, "message": f"Item '{name}' registered with image '{image.filename}'"}
 
 @router.put("/{item_id}", response_model=MenuItemOut)
 def update_menu_item(item_id: int, item: MenuItem):
