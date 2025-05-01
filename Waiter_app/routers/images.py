@@ -25,3 +25,21 @@ def get_image(filename: str):
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Image not found")
     return FileResponse(file_path)
+
+@router.put("/{item_id}")
+def update_menu_item(item_id: int, item: MenuItem):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        UPDATE menu_items
+        SET name=%s, description=%s, price=%s, category=%s, image=%s
+        WHERE id = %s
+        """,
+        (item.name, item.description, item.price, item.category, item.image, item_id)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Menu item updated"}
+

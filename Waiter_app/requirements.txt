@@ -7,5 +7,4 @@ python-jose
 pydantic
 python-dotenv
 aiofiles
-python-multipart
-jwt
+python-jose
