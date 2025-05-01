@@ -5,18 +5,15 @@ from db import get_db
 
 router = APIRouter()
 
-
 class MenuItem(BaseModel):
     name: str
     description: Optional[str] = None
     price: float
     category: str
-
+    image_url: Optional[str] = None
 
 class MenuItemOut(MenuItem):
     id: int
-
-
 
 @router.get("/", response_model=List[MenuItemOut])
 def list_menu_items(category: Optional[str] = Query(None)):
@@ -31,8 +28,6 @@ def list_menu_items(category: Optional[str] = Query(None)):
     conn.close()
     return items
 
-
-
 @router.get("/{item_id}", response_model=MenuItemOut)
 def get_menu_item(item_id: int):
     conn = get_db()
@@ -45,15 +40,13 @@ def get_menu_item(item_id: int):
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
-
-
 @router.post("/", response_model=MenuItemOut)
 def create_menu_item(item: MenuItem):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO menu_items (name, description, price, category) VALUES (%s, %s, %s, %s)",
-        (item.name, item.description, item.price, item.category),
+        "INSERT INTO menu_items (name, description, price, category, image) VALUES (%s, %s, %s, %s, %s)",
+        (item.name, item.description, item.price, item.category, item.image_url),
     )
     conn.commit()
     item_id = cursor.lastrowid
@@ -61,22 +54,18 @@ def create_menu_item(item: MenuItem):
     conn.close()
     return {"id": item_id, **item.dict()}
 
-
-
 @router.put("/{item_id}", response_model=MenuItemOut)
 def update_menu_item(item_id: int, item: MenuItem):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(
-        "UPDATE menu_items SET name=%s, description=%s, price=%s, category=%s WHERE id=%s",
-        (item.name, item.description, item.price, item.category, item_id),
+        "UPDATE menu_items SET name=%s, description=%s, price=%s, category=%s, image=%s WHERE id=%s",
+        (item.name, item.description, item.price, item.category, item.image_url, item_id),
     )
     conn.commit()
     cursor.close()
     conn.close()
     return {"id": item_id, **item.dict()}
-
-
 
 @router.delete("/{item_id}")
 def delete_menu_item(item_id: int):
@@ -88,18 +77,19 @@ def delete_menu_item(item_id: int):
     conn.close()
     return {"message": "Item deleted"}
 
-
-
-@router.get("/", response_model=List[MenuItem])
-def get_menu_items():
+@router.post("/bulk")
+def bulk_add_menu_items(items: List[MenuItem]):
     conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT id, name, description, price, category FROM menu_items")
-    items = cursor.fetchall()
+    cursor = conn.cursor()
+    for item in items:
+        cursor.execute(
+            "INSERT INTO menu_items (name, description, price, category, image) VALUES (%s, %s, %s, %s, %s)",
+            (item.name, item.description, item.price, item.category, item.image_url)
+        )
+    conn.commit()
     cursor.close()
     conn.close()
-    return items
-
+    return {"message": f"{len(items)} items inserted successfully"}
 
 @router.get("/ping")
 def ping_server():
@@ -112,7 +102,6 @@ def ping_server():
         return {"status": "ok"}
     except Exception as e:
         return {"status": "error", "details": str(e)}
-        
 
 app = FastAPI()
 app.include_router(router)
