@@ -1,9 +1,14 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Query, UploadFile, File, Form
 from pydantic import BaseModel
 from typing import Optional, List
 from db import get_db
+import os
+import shutil
 
 router = APIRouter()
+
+UPLOAD_DIR = "uploads"
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 class MenuItem(BaseModel):
     name: str
@@ -55,6 +60,40 @@ def create_menu_item(item: MenuItem):
     conn.close()
     return {"id": item_id, **item.dict()}
 
+@router.post("/register-item", response_model=MenuItemOut)
+def register_item(
+    name: str = Form(...),
+    description: str = Form(""),
+    price: float = Form(...),
+    category: str = Form(...),
+    discount: float = Form(0),
+    image: UploadFile = File(...)
+):
+    file_path = os.path.join(UPLOAD_DIR, image.filename)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(image.file, buffer)
+
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO menu_items (name, description, price, category, image, discount) VALUES (%s, %s, %s, %s, %s, %s)",
+        (name, description, price, category, image.filename, discount)
+    )
+    conn.commit()
+    item_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+
+    return {
+        "id": item_id,
+        "name": name,
+        "description": description,
+        "price": price,
+        "category": category,
+        "image": image.filename,
+        "discount": discount,
+    }
+
 @router.put("/{item_id}", response_model=MenuItemOut)
 def update_menu_item(item_id: int, item: MenuItem):
     conn = get_db()
@@ -77,6 +116,18 @@ def delete_menu_item(item_id: int):
     cursor.close()
     conn.close()
     return {"message": "Item deleted"}
+
+@router.get("/ping")
+def ping_server():
+    try:
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
+        cursor.close()
+        conn.close()
+        return {"status": "ok"}
+    except Exception as e:
+        return {"status": "error", "details": str(e)}
 
 app = FastAPI()
 app.include_router(router)
