@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="calculator.css" />
+  </head>
+  <body>
+    <main class="calculator-container">
+      <div class="calculator-wrapper">
+        <div class="calculator-display" role="alert" aria-live="polite">
+          <span class="display-value" id="displayValue">0</span>
+        </div>
+        <div
+          class="calculator-keypad"
+          role="group"
+          aria-label="Calculator keypad"
+        >
+          <button class="key key-clear" aria-label="Clear">C</button>
+          <button class="key key-divide key-span-3" aria-label="Divide">
+            /
+          </button>
+          <button class="key key-number" aria-label="Seven">7</button>
+          <button class="key key-number" aria-label="Eight">8</button>
+          <button class="key key-number" aria-label="Nine">9</button>
+          <button class="key key-operator" aria-label="Multiply">×</button>
+          <button class="key key-number" aria-label="Four">4</button>
+          <button class="key key-number" aria-label="Five">5</button>
+          <button class="key key-number" aria-label="Six">6</button>
+          <button class="key key-operator" aria-label="Subtract">-</button>
+          <button class="key key-number" aria-label="One">1</button>
+          <button class="key key-number" aria-label="Two">2</button>
+          <button class="key key-number" aria-label="Three">3</button>
+          <button class="key key-operator" aria-label="Add">+</button>
+          <button class="key key-number key-span-2" aria-label="Zero">0</button>
+          <button class="key key-decimal" aria-label="Decimal point">.</button>
+          <button class="key key-equals" aria-label="Equals">=</button>
+        </div>
+      </div>
+    </main>
+    <script src="calculator.js"></script>
+  </body>
+</html>

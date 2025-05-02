@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="waiter-management.css" />
+    <title>Waiter Management Dashboard</title>
+  </head>
+  <body>
+    <main class="dashboard">
+      <div class="dashboard-container">
+        <header class="dashboard-header">
+          <h1 class="dashboard-title">Waiter Management</h1>
+          <div class="search-controls">
+            <div class="search-wrapper">
+              <input
+                type="text"
+                placeholder="Search waiters..."
+                class="search-input"
+                aria-label="Search waiters"
+              />
+            </div>
+            <select class="status-filter" aria-label="Filter by status">
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="break">On Break</option>
+              <option value="offline">Offline</option>
+            </select>
+          </div>
+        </header>
+
+        <section class="stats-grid">
+          <article class="stats-card">
+            <p class="stats-label">Total Waiters</p>
+            <p class="stats-value total-count">0</p>
+          </article>
+          <article class="stats-card">
+            <p class="stats-label">Active Waiters</p>
+            <p class="stats-value active-count">0</p>
+          </article>
+          <article class="stats-card">
+            <p class="stats-label">On Break</p>
+            <p class="stats-value break-count">0</p>
+          </article>
+          <article class="stats-card">
+            <p class="stats-label">Offline</p>
+            <p class="stats-value offline-count">0</p>
+          </article>
+        </section>
+
+        <section class="table-container">
+          <table class="waiters-table" aria-label="Waiters List">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Tables</th>
+                <th scope="col">Orders</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="waiters-table-body">
+              <!-- Dynamic content will be inserted here -->
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+    <script src="waiter-management.js"></script>
+  </body>
+</html>

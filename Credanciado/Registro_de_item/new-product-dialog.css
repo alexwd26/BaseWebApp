@@ -1,0 +1,219 @@
+.product-dialog {
+  background-color: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 95%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+}
+
+.dialog-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dialog-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+  color: #878787;
+  padding: 0;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.upload-zone {
+  border: 2px dashed #e5e7eb;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-zone:hover {
+  border-color: #4318d1;
+}
+
+.upload-primary {
+  font-size: 14px;
+  color: #4318d1;
+  font-weight: 500;
+  margin-bottom: 4px;
+  margin: 0;
+}
+
+.upload-secondary {
+  font-size: 12px;
+  color: #878787;
+  margin: 4px 0 0 0;
+}
+
+.file-input {
+  display: none;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+.form-textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.additionals-container {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.additionals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.additional-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.additional-name {
+  flex: 2;
+}
+
+.additional-price {
+  flex: 1;
+}
+
+.remove-button {
+  padding: 8px 12px;
+  background-color: #f43f5e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-button {
+  padding: 8px 12px;
+  background-color: #4318d1;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.help-text {
+  font-size: 12px;
+  color: #878787;
+  font-style: italic;
+  margin: 12px 0 0 0;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+.cancel-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+  color: #878787;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.submit-button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background-color: #4318d1;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+@media (max-width: 991px) {
+  .product-dialog {
+    padding: 20px;
+    width: 90%;
+  }
+
+  .additionals-list {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .product-dialog {
+    padding: 16px;
+    width: 95%;
+    height: 95vh;
+  }
+
+  .product-form {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .additional-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .form-actions {
+    margin-top: auto;
+    padding-top: 16px;
+    flex-direction: column;
+  }
+}
