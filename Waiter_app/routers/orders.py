@@ -11,6 +11,8 @@ class OrderRequest(BaseModel):
     table_number: Optional[int] = None
     address: Optional[str] = None
     items: str
+    observation: Optional[str] = None
+
 
 class OrderStatusUpdate(BaseModel):
     status: str  # 'pending', 'kitchen', 'ready', 'complete'
@@ -26,20 +28,21 @@ def create_order(order: OrderRequest):
     conn = get_db()
     cursor = conn.cursor()
     if order.order_type == "dine-in":
-        cursor.execute(
-            "INSERT INTO orders (order_type, table_number, items, status) VALUES (%s, %s, %s, %s)",
-            (order.order_type, order.table_number, order.items, "pending"),
+    cursor.execute(
+        "INSERT INTO orders (order_type, table_number, items, status, observation) VALUES (%s, %s, %s, %s, %s)",
+        (order.order_type, order.table_number, order.items, "pending", order.observation),
         )
     elif order.order_type == "delivery":
         cursor.execute(
-            "INSERT INTO orders (order_type, address, items, status) VALUES (%s, %s, %s, %s)",
-            (order.order_type, order.address, order.items, "pending"),
+            "INSERT INTO orders (order_type, address, items, status, observation) VALUES (%s, %s, %s, %s, %s)",
+            (order.order_type, order.address, order.items, "pending", order.observation),
         )
     elif order.order_type == "takeout":
         cursor.execute(
-            "INSERT INTO orders (order_type, items, status) VALUES (%s, %s, %s)",
-            (order.order_type, order.items, "pending"),
+            "INSERT INTO orders (order_type, items, status, observation) VALUES (%s, %s, %s, %s)",
+            (order.order_type, order.items, "pending", order.observation),
         )
+
     else:
         raise HTTPException(status_code=400, detail="Invalid order type")
 
