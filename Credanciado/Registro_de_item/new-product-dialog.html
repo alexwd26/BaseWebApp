@@ -3,130 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Item Registration</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Register New Item</title>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
         }
-        .preview-container {
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        textarea,
+        select {
+            width: calc(100% - 12px);
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        #discount-group {
             display: none;
-        }
-        .preview-container img{
-            max-width: 200px;
-            height: auto;
-            margin-top: 1rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
     </style>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="container max-w-2xl mx-auto bg-white shadow-md rounded-lg p-8">
-        <h1 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Register New Item</h1>
-        <form id="item-form" class="space-y-4" enctype="multipart/form-data">
-            <div>
-                <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
-                <input type="text" id="name" name="name" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+<body>
+    <div class="container">
+        <h2>Register New Item</h2>
+        <form id="registerForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
             </div>
-            <div>
-                <label for="description" class="block text-gray-700 text-sm font-bold mb-2">Description:</label>
-                <textarea id="description" name="description" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+            <div class="form-group">
+                <label for="description">Description:</label>
+                <textarea id="description" name="description"></textarea>
             </div>
-            <div>
-                <label for="price" class="block text-gray-700 text-sm font-bold mb-2">Price:</label>
-                <input type="number" id="price" name="price" min="0" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            <div class="form-group">
+                <label for="price">Price:</label>
+                <input type="number" id="price" name="price" step="0.01" required>
             </div>
-            <div>
-                <label for="category" class="block text-gray-700 text-sm font-bold mb-2">Category:</label>
-                <input type="text" id="category" name="category" required class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+            <div class="form-group">
+                <label for="category">Category:</label>
+                <select id="category" name="category" required>
+                    <option value="" disabled selected>Loading Categories...</option>
+                </select>
             </div>
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Register Item</button>
+            <div class="form-group" id="discount-group">
+                <label for="discount">Discount:</label>
+                <input type="number" id="discount" name="discount" step="0.01" value="0">
+            </div>
+            <div class="form-group">
+                <label for="image">Image:</label>
+                <input type="file" id="image" name="image" accept="image/*" required>
+            </div>
+            <button type="submit">Register Item</button>
+            <div id="errorContainer" class="error-message"></div>
+            <div id="successMessage" style="color: green; margin-top: 10px; display: none;">Item registered successfully!</div>
         </form>
 
-        <div id="message-container" class="mt-6 text-center">
-            </div>
-    </div>
+        <script>
+            const categorySelect = document.getElementById('category');
 
-    <script>
-        const itemForm = document.getElementById('item-form');
-        const messageContainer = document.getElementById('message-container');
+            // Function to fetch categories from the backend
+            async function fetchCategories() {
+                try {
+                    const response = await fetch('http://15.228.148.198:8000/api/menus/'); 
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch categories: ${response.status}`);
+                    }
+                    const categories = await response.json();
 
-        // 1.  Declare a constant for the API URL.  Use a default value.
-        const DEFAULT_API_URL = 'http://15.228.148.198:8000/api/menus/';
-        const apiUrl = DEFAULT_API_URL;
+                    // Clear the loading option and add the fetched categories
+                    categorySelect.innerHTML = ''; // Clear existing options
+                    categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.name; // Or category.id, depending on your backend
+                        option.textContent = category.name;
+                        categorySelect.appendChild(option);
+                    });
+                    // Set the first option as selected if available.
+                    if (categories.length > 0) {
+                      categorySelect.value = categories[0].name;
+                    }
 
-
-        itemForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-
-            const formData = new FormData(itemForm); // Use FormData to handle file upload
-
-           if (!formData.get('name') || !formData.get('description') || !formData.get('price') || !formData.get('category')) {
-                showMessage('Please fill in all fields with valid data.', 'error');
-                return;
+                } catch (error) {
+                    console.error('Error fetching categories:', error);
+                    categorySelect.innerHTML = '<option value="" disabled>Error loading categories</option>';
+                }
             }
 
+            // Call fetchCategories when the page loads
+            window.addEventListener('load', fetchCategories);
 
 
-                // Construct the JSON payload as expected by the API
-                const payload = {
-                    name: formData.get('name'),
-                    description: formData.get('description'),
-                    price: parseFloat(formData.get('price')),
-                    category: formData.get('category'),
-                };
+            document.getElementById('registerForm').addEventListener('submit', async (event) => {
+                event.preventDefault();
 
+                const formData = new FormData(event.target);
 
-                fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json', // Set content type to JSON
-                    },
-                    body: JSON.stringify(payload), // Send the JSON payload
-                })
-                .then(response => {
-                    if (!response.ok) {
-                         return response.json().then(errorData => {
-                            // Check for a detailed error message from the server
-                            const errorMessage = errorData && errorData.message ? errorData.message :
-                                                 errorData && errorData.detail ? errorData.detail :
-                                                 `HTTP error! Status: ${response.status}`;
-                            throw new Error(errorMessage);
-                        });
+                try {
+                    const response = await fetch('http://15.228.148.198:8000/api/menus/register-item', {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('Success:', data);
+                        document.getElementById('errorContainer').textContent = '';
+                        document.getElementById('successMessage').style.display = 'block';
+                        document.getElementById('registerForm').reset();
+                        setTimeout(() => {
+                            document.getElementById('successMessage').style.display = 'none';
+                        }, 3000);
+                    } else {
+                        const errorData = await response.json();
+                        console.error('Error:', errorData);
+                        document.getElementById('errorContainer').textContent = errorData.detail || 'Failed to register item.';
+                        document.getElementById('successMessage').style.display = 'none';
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    showMessage('Item registered successfully!', 'success');
-                    itemForm.reset(); // Clear the form
-
-                })
-                .catch(error => {
-                    let errorMessage = 'An unknown error occurred.';
-                    if (error instanceof Error) {
-                        errorMessage = error.message;
-                    }
-                    showMessage(`Error: ${errorMessage}`, 'error');
-                    console.error('Error registering item:', error);
-                });
-
-        });
-
-        function showMessage(message, type = 'success') {
-            messageContainer.innerHTML = ''; // Clear previous messages
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `bg-${type === 'success' ? 'green' : 'red'}-100 border border-${type === 'success' ? 'green' : 'red'}-400 text-${type === 'success' ? 'green' : 'red'}-700 px-4 py-3 rounded relative`;
-            messageDiv.role = 'alert';
-            messageDiv.innerHTML = `<strong class="font-bold">${type === 'success' ? 'Success!' : 'Error!'}</strong>
-                                    <span class="block sm:inline">${message}</span>`;
-            messageContainer.appendChild(messageDiv);
-        }
-
-
-    </script>
+                } catch (error) {
+                    console.error('Network error:', error);
+                    document.getElementById('errorContainer').textContent = 'Network error occurred.';
+                    document.getElementById('successMessage').style.display = 'none';
+                }
+            });
+        </script>
+    </div>
 </body>
 </html>
