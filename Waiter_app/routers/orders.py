@@ -1,8 +1,8 @@
-# routers/orders.py
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional, List
 from db import get_db
+import datetime
 
 router = APIRouter()
 
@@ -11,50 +11,38 @@ class OrderRequest(BaseModel):
     table_number: Optional[int] = None
     address: Optional[str] = None
     items: str
-    role: Optional[str] = None  # added for frontend auth
 
 class OrderStatusUpdate(BaseModel):
     status: str  # 'pending', 'kitchen', 'ready', 'complete'
-    role: Optional[str] = None  # added for frontend auth
 
-def get_max_tables():
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("SELECT value FROM settings WHERE name = 'max_tables'")
-    result = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    return int(result[0]) if result else 20
+class OrderUpdate(BaseModel):
+    order_type: Optional[str] = None
+    table_number: Optional[int] = None
+    address: Optional[str] = None
+    items: Optional[str] = None
 
 @router.post("/", status_code=201)
 def create_order(order: OrderRequest):
-    if order.order_type not in ["dine-in", "delivery", "takeout"]:
-        raise HTTPException(status_code=400, detail="Invalid order type")
-
-    if order.role not in ["admin", "waiter", "customer"]:
-        raise HTTPException(status_code=403, detail="Only admin, waiter, or customer can place an order")
-
-    if order.order_type == "dine-in":
-        if order.table_number is None:
-            raise HTTPException(status_code=400, detail="Table number is required for dine-in")
-        max_tables = get_max_tables()
-        if order.table_number < 1 or order.table_number > max_tables:
-            raise HTTPException(status_code=400, detail=f"Table number must be between 1 and {max_tables}")
-
     conn = get_db()
     cursor = conn.cursor()
+    if order.order_type == "dine-in":
+        cursor.execute(
+            "INSERT INTO orders (order_type, table_number, items, status) VALUES (%s, %s, %s, %s)",
+            (order.order_type, order.table_number, order.items, "pending"),
+        )
+    elif order.order_type == "delivery":
+        cursor.execute(
+            "INSERT INTO orders (order_type, address, items, status) VALUES (%s, %s, %s, %s)",
+            (order.order_type, order.address, order.items, "pending"),
+        )
+    elif order.order_type == "takeout":
+        cursor.execute(
+            "INSERT INTO orders (order_type, items, status) VALUES (%s, %s, %s)",
+            (order.order_type, order.items, "pending"),
+        )
+    else:
+        raise HTTPException(status_code=400, detail="Invalid order type")
 
-    query = """
-        INSERT INTO orders (order_type, table_number, address, items, status)
-        VALUES (%s, %s, %s, %s, %s)
-    """
-    cursor.execute(query, (
-        order.order_type,
-        order.table_number,
-        order.address,
-        order.items,
-        "pending"
-    ))
     conn.commit()
     order_id = cursor.lastrowid
     cursor.close()
@@ -75,7 +63,9 @@ def get_order_by_id(order_id: int):
     return order
 
 @router.get("/")
-def list_orders(order_type: Optional[str] = None, status: Optional[str] = None):
+def list_orders(
+    order_type: Optional[str] = None, status: Optional[str] = None
+):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
 
@@ -103,16 +93,49 @@ def list_orders(order_type: Optional[str] = None, status: Optional[str] = None):
 
 @router.patch("/{order_id}")
 def update_order_status(order_id: int, update: OrderStatusUpdate):
-    if update.role not in ["admin", "motoboy"]:
-        raise HTTPException(status_code=403, detail="Only admin or motoboy can update status")
-
-    if update.status not in ["pending", "kitchen", "ready", "complete"]:
-        raise HTTPException(status_code=400, detail="Invalid status")
-
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("UPDATE orders SET status = %s WHERE id = %s", (update.status, order_id))
+    cursor.execute(
+        "UPDATE orders SET status = %s WHERE id = %s", (update.status, order_id)
+    )
     conn.commit()
     cursor.close()
     conn.close()
     return {"message": f"Order {order_id} status updated to {update.status}"}
+
+# NEW: Full order update (excluding status)
+@router.patch("/{order_id}/edit")
+def update_order(order_id: int, update: OrderUpdate):
+    conn = get_db()
+    cursor = conn.cursor()
+
+    fields = []
+    values = []
+
+    if update.order_type is not None:
+        fields.append("order_type = %s")
+        values.append(update.order_type)
+
+    if update.table_number is not None:
+        fields.append("table_number = %s")
+        values.append(update.table_number)
+
+    if update.address is not None:
+        fields.append("address = %s")
+        values.append(update.address)
+
+    if update.items is not None:
+        fields.append("items = %s")
+        values.append(update.items)
+
+    if not fields:
+        raise HTTPException(status_code=400, detail="No data provided to update")
+
+    values.append(order_id)
+    sql = f"UPDATE orders SET {', '.join(fields)} WHERE id = %s"
+    cursor.execute(sql, tuple(values))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return {"message": f"Order {order_id} updated successfully"}
