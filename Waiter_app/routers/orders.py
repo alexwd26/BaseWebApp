@@ -2,45 +2,50 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional, List
 from db import get_db
-import datetime
 
 router = APIRouter()
+
 
 class OrderRequest(BaseModel):
     order_type: str  # 'dine-in', 'delivery', 'takeout'
     table_number: Optional[int] = None
     address: Optional[str] = None
     items: str
+    observation: Optional[str] = None  # New field
+
 
 class OrderStatusUpdate(BaseModel):
     status: str  # 'pending', 'kitchen', 'ready', 'complete'
+
 
 class OrderUpdate(BaseModel):
     order_type: Optional[str] = None
     table_number: Optional[int] = None
     address: Optional[str] = None
     items: Optional[str] = None
+    observation: Optional[str] = None  # New field
+
 
 @router.post("/", status_code=201)
 def create_order(order: OrderRequest):
     conn = get_db()
     cursor = conn.cursor()
-        if order.order_type == "dine-in":
-            cursor.execute(
-                "INSERT INTO orders (order_type, table_number, items, status, observation) VALUES (%s, %s, %s, %s, %s)",
-                (order.order_type, order.table_number, order.items, "pending", order.observation),
-            )
-        elif order.order_type == "delivery":
-            cursor.execute(
-                "INSERT INTO orders (order_type, address, items, status, observation) VALUES (%s, %s, %s, %s, %s)",
-                (order.order_type, order.address, order.items, "pending", order.observation),
-            )
-        elif order.order_type == "takeout":
-            cursor.execute(
-                "INSERT INTO orders (order_type, items, status, observation) VALUES (%s, %s, %s, %s)",
-                (order.order_type, order.items, "pending", order.observation),
-            )
 
+    if order.order_type == "dine-in":
+        cursor.execute(
+            "INSERT INTO orders (order_type, table_number, items, status, observation) VALUES (%s, %s, %s, %s, %s)",
+            (order.order_type, order.table_number, order.items, "pending", order.observation),
+        )
+    elif order.order_type == "delivery":
+        cursor.execute(
+            "INSERT INTO orders (order_type, address, items, status, observation) VALUES (%s, %s, %s, %s, %s)",
+            (order.order_type, order.address, order.items, "pending", order.observation),
+        )
+    elif order.order_type == "takeout":
+        cursor.execute(
+            "INSERT INTO orders (order_type, items, status, observation) VALUES (%s, %s, %s, %s)",
+            (order.order_type, order.items, "pending", order.observation),
+        )
     else:
         raise HTTPException(status_code=400, detail="Invalid order type")
 
@@ -50,6 +55,7 @@ def create_order(order: OrderRequest):
     conn.close()
 
     return {"order_id": order_id, "message": "Order placed successfully"}
+
 
 @router.get("/{order_id}")
 def get_order_by_id(order_id: int):
@@ -63,10 +69,9 @@ def get_order_by_id(order_id: int):
         raise HTTPException(status_code=404, detail="Order not found")
     return order
 
+
 @router.get("/")
-def list_orders(
-    order_type: Optional[str] = None, status: Optional[str] = None
-):
+def list_orders(order_type: Optional[str] = None, status: Optional[str] = None):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
 
@@ -92,6 +97,7 @@ def list_orders(
     conn.close()
     return orders
 
+
 @router.patch("/{order_id}")
 def update_order_status(order_id: int, update: OrderStatusUpdate):
     conn = get_db()
@@ -104,7 +110,7 @@ def update_order_status(order_id: int, update: OrderStatusUpdate):
     conn.close()
     return {"message": f"Order {order_id} status updated to {update.status}"}
 
-# NEW: Full order update (excluding status)
+
 @router.patch("/{order_id}/edit")
 def update_order(order_id: int, update: OrderUpdate):
     conn = get_db()
@@ -128,6 +134,10 @@ def update_order(order_id: int, update: OrderUpdate):
     if update.items is not None:
         fields.append("items = %s")
         values.append(update.items)
+
+    if update.observation is not None:
+        fields.append("observation = %s")
+        values.append(update.observation)
 
     if not fields:
         raise HTTPException(status_code=400, detail="No data provided to update")
