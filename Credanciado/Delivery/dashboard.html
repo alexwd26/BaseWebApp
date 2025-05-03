@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Entregas - Kanban</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .delivery-dashboard {
+            padding: 24px;
+            height: calc(100vh - 48px);
+            font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-shrink: 0;
+        }
+
+        .dashboard-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #101010;
+        }
+
+        .kanban-board {
+            display: flex;
+            gap: 24px;
+            overflow-x: auto;
+            padding-bottom: 16px;
+            flex-grow: 1;
+            min-height: 0;
+        }
+
+        .kanban-column {
+            flex: 1;
+            min-width: 320px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .column-title {
+            font-weight: 600;
+            font-size: 16px;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .column-count {
+            background: #e5e7eb;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 14px;
+            color: white;
+        }
+
+        .column-content {
+            overflow-y: auto;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .order-number {
+            font-weight: 600;
+            font-size: 16px;
+            color: #101010;
+        }
+
+        .order-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .order-time, .order-date {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .order-info {
+            background: #f9fafb;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #111827;
+            font-weight: 500;
+        }
+
+        .items-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 12px;
+        }
+
+        .order-items {
+            padding: 8px 0;
+            color: #374151;
+        }
+
+        .items-text {
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .order-total {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 12px;
+            margin-top: 12px;
+            border-top: 1px solid #e5e7eb;
+            font-weight: 600;
+        }
+
+        .order-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .status-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-edit-order {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: #f3f4f6;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-edit-order:hover {
+            background-color: #e5e7eb;
+        }
+
+        .btn-edit-order:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .edit-icon {
+            font-size: 14px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background-color: #4318d1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #3a14b8;
+        }
+
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background-color: #e5e7eb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .error {
+            color: #ef4444;
+            padding: 16px;
+            background: #fee2e2;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        /* Status-specific styles */
+        .kanban-column.pending {
+            background: #FFF7ED;
+            border: 1px solid #FB923C;
+        }
+
+        .kanban-column.kitchen {
+            background: #FEF3C7;
+            border: 1px solid #F59E0B;
+        }
+
+        .kanban-column.in-delivery {
+            background: #EFF6FF;
+            border: 1px solid #3B82F6;
+        }
+
+        .kanban-column.completed {
+            background: #ECFDF5;
+            border: 1px solid #10B981;
+        }
+
+        .kanban-column.cancelled {
+            background: #FEF2F2;
+            border: 1px solid #EF4444;
+        }
+
+        /* Column header colors */
+        .kanban-column.pending .column-header {
+            border-bottom: 2px solid #FB923C;
+        }
+
+        .kanban-column.kitchen .column-header {
+            border-bottom: 2px solid #F59E0B;
+        }
+
+        .kanban-column.in-delivery .column-header {
+            border-bottom: 2px solid #3B82F6;
+        }
+
+        .kanban-column.completed .column-header {
+            border-bottom: 2px solid #10B981;
+        }
+
+        .kanban-column.cancelled .column-header {
+            border-bottom: 2px solid #EF4444;
+        }
+
+        /* Column count badge colors */
+        .kanban-column.pending .column-count {
+            background: #FB923C;
+        }
+
+        .kanban-column.kitchen .column-count {
+            background: #F59E0B;
+        }
+
+        .kanban-column.in-delivery .column-count {
+            background: #3B82F6;
+        }
+
+        .kanban-column.completed .column-count {
+            background: #10B981;
+        }
+
+        .kanban-column.cancelled .column-count {
+            background: #EF4444;
+        }
+
+        @media (max-width: 991px) {
+            .delivery-dashboard {
+                padding: 16px;
+                height: calc(100vh - 32px);
+            }
+
+            .kanban-board {
+                margin: 0 -16px;
+                padding: 0 16px;
+            }
+        }
+
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .order-details {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 12px;
+        }
+
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .item-row {
+            padding: 8px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .item-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .item-name {
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .item-quantity {
+            color: #6b7280;
+        }
+
+        .item-price {
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .item-obs {
+            margin-top: 4px;
+            font-size: 13px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .order-total {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e5e7eb;
+            text-align: right;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .popup-content {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            margin: 20px;
+            position: relative;
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .popup-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 4px;
+        }
+
+        @media (max-width: 640px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .order-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .popup-content {
+                margin: 16px;
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="text/babel">
+        function DeliveryDashboard() {
+            const [orders, setOrders] = React.useState([]);
+            const [isLoading, setIsLoading] = React.useState(false);
+            const [error, setError] = React.useState(null);
+            const [updatingOrders, setUpdatingOrders] = React.useState(new Set());
+            const [menuItems, setMenuItems] = React.useState({});
+            const [menuError, setMenuError] = React.useState(null);
+
+            async function loadMenuItems() {
+                try {
+                    const response = await fetch('http://15.228.148.198:8000/api/menus/');
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch menu items');
+                    }
+                    const data = await response.json();
+
+                    // Transform menu items into a lookup object
+                    const menuLookup = {};
+                    data.forEach(item => {
+                        menuLookup[item.id] = item;
+                    });
+
+                    setMenuItems(menuLookup);
+                    setMenuError(null);
+                } catch (err) {
+                    console.error('Error loading menu items:', err);
+                    setMenuError('Failed to load menu prices');
+                }
+            }
+
+            const [isLoadingMenu, setIsLoadingMenu] = React.useState(false);
+
+            async function fetchMenuItems() {
+                setIsLoadingMenu(true);
+                try {
+                    const response = await fetch('http://15.228.148.198:8000/api/menus/');
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch menu items');
+                    }
+                    const data = await response.json();
+                    return data;
+                } catch (err) {
+                    console.error('Error loading menu:', err);
+                    setError('Failed to load menu prices');
+                    return [];
+                } finally {
+                    setIsLoadingMenu(false);
+                }
+            }
+
+            function parseItems(itemsString, menuData) {
+                if (!itemsString) return [];
+                return itemsString.split(',').map(item => {
+                    const trimmed = item.trim();
+                    const match = trimmed.match(/^(.+?)\s*x(\d+)$/);
+                    const name = match ? match[1].trim() : trimmed;
+                    const quantity = match ? parseInt(match[2], 10) : 1;
+
+                    // Find menu item by name
+                    const menuItem = menuData.find(mi =>
+                        mi.name.toLowerCase() === name.toLowerCase()
+                    );
+
+                    return {
+                        name,
+                        quantity,
+                        price: menuItem ? menuItem.price * quantity : 0
+                    };
+                });
+            }
+
+            function calculateOrderTotal(items) {
+                return items.reduce((total, item) => total + (item.price || 0), 0);
+            }
+
+            async function loadOrders() {
+                setIsLoading(true);
+                setError(null);
+                try {
+                    // Fetch menu items first
+                    const menuData = await fetchMenuItems();
+
+                    // Then fetch orders
+                    const response = await fetch(
+                        "http://15.228.148.198:8000/api/orders?order_type=delivery"
+                    );
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch orders");
+                    }
+                    const data = await response.json();
+
+                    // Transform orders with menu prices
+                    const transformedOrders = data.map((order) => {
+                        const parsedItems = parseItems(order.items, menuData);
+                        return {
+                            id: order.id,
+                            order_type: order.order_type || 'delivery',
+                            table_number: order.table_number,
+                            address: order.address || '',
+                            items: parsedItems,
+                            total: calculateOrderTotal(parsedItems),
+                            status: order.status || 'pending',
+                            created_by: order.created_by || 'Sistema',
+                            created_at: order.created_at,
+                            time: new Date(order.created_at).toLocaleTimeString(),
+                            date: new Date(order.created_at).toLocaleDateString()
+                        };
+                    });
+                    setOrders(transformedOrders);
+                    console.error("Error loading orders:", err);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+
+            async function updateOrderStatus(orderId, newStatus) {
+                setUpdatingOrders(prev => new Set([...prev, orderId]));
+
+                try {
+                    const response = await fetch(
+                        `http://15.228.148.198:8000/api/orders/${orderId}`,
+                        {
+                            method: "PATCH",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({ status: newStatus })
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error("Failed to update order status");
+                    }
+
+                    // Update local state immediately
+                    setOrders(prevOrders =>
+                        prevOrders.map(order =>
+                            order.id === orderId
+                                ? { ...order, status: newStatus }
+                                : order
+                        )
+                    );
+                } catch (err) {
+                    console.error("Error updating order status:", err);
+                    alert("Failed to update order status. Please try again.");
+                    await loadOrders(); // Reload orders on error
+                } finally {
+                    setUpdatingOrders(prev => {
+                        const next = new Set(prev);
+                        next.delete(orderId);
+                        return next;
+                    });
+                }
+            }
+
+            React.useEffect(() => {
+                loadOrders(true);
+                const interval = setInterval(() => loadOrders(false), 30000);
+
+                // Add message listener for edit window
+                const handleMessage = (event) => {
+                    if (event.data.type === 'orderUpdated') {
+                        loadOrders(true);
+                    }
+                };
+                window.addEventListener('message', handleMessage);
+
+                return () => {
+                    clearInterval(interval);
+                    window.removeEventListener('message', handleMessage);
+                };
+            }, []);
+
+            const ordersByStatus = React.useMemo(() => ({
+                pending: orders.filter(order => order.status === 'pending' || !order.status),
+                kitchen: orders.filter(order => order.status === 'kitchen'),
+                in_delivery: orders.filter(order => order.status === 'in_delivery'),
+                completed: orders.filter(order => order.status === 'completed'),
+                cancelled: orders.filter(order => order.status === 'cancelled')
+            }), [orders]);
+
+            const OrderCard = ({ order, onStatusUpdate, onEditOrder }) => (
+                <div className="order-card">
+                    <div className="order-header">
+                        <span className="order-number">Pedido #{order.id}</span>
+                        <div className="order-meta">
+                            <span className="order-time">{order.time}</span>
+                            <span className="order-date">{order.date}</span>
+                        </div>
+                    </div>
+                    <div className="order-info">
+                        <div className="info-row">
+                            <span className="info-label">Tipo:</span>
+                            <span className="info-value">{order.order_type}</span>
+                        </div>
+                        {order.table_number && (
+                            <div className="info-row">
+                                <span className="info-label">Mesa:</span>
+                                <span className="info-value">{order.table_number}</span>
+                            </div>
+                        )}
+                        {order.address && (
+                            <div className="info-row">
+                                <span className="info-label">Endereço:</span>
+                                <span className="info-value">{order.address}</span>
+                            </div>
+                        )}
+                        <div className="info-row">
+                            <span className="info-label">Criado por:</span>
+                            <span className="info-value">{order.created_by}</span>
+                        </div>
+                    </div>
+                    <div className="order-details">
+                        <h3 className="items-title">Itens do Pedido</h3>
+                        <ul className="order-items">
+                            {order.items.map((item, index) => (
+                                <li key={index} className="order-item">
+                                    <div className="item-info">
+                                        <span className="item-quantity">{item.quantity}x</span>
+                                        <span className="item-name">{item.name}</span>
+                                    </div>
+                                    <span className="item-price">
+                                        R$ {item.price.toFixed(2)}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                        <div className="order-total">
+                            <span>Total</span>
+                            <span>R$ {order.total.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div className="order-actions">
+                        <div className="status-actions">
+                            {order.status === 'pending' && (
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => onStatusUpdate(order.id, 'kitchen')}
+                                    disabled={updatingOrders.has(order.id)}
+                                >
+                                    {updatingOrders.has(order.id) ? 'Atualizando...' : 'Enviar para Cozinha'}
+                                </button>
+                            )}
+                            {order.status === 'kitchen' && (
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => onStatusUpdate(order.id, 'in_delivery')}
+                                    disabled={updatingOrders.has(order.id)}
+                                >
+                                    {updatingOrders.has(order.id) ? 'Atualizando...' : 'Iniciar Entrega'}
+                                </button>
+                            )}
+                            {order.status === 'in_delivery' && (
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => onStatusUpdate(order.id, 'completed')}
+                                    disabled={updatingOrders.has(order.id)}
+                                >
+                                    {updatingOrders.has(order.id) ? 'Atualizando...' : 'Concluir Entrega'}
+                                </button>
+                            )}
+                            {['pending', 'kitchen', 'in_delivery'].includes(order.status) && (
+                                <button
+                                    className="btn btn-secondary"
+                                    onClick={() => onStatusUpdate(order.id, 'cancelled')}
+                                    disabled={updatingOrders.has(order.id)}
+                                >
+                                    {updatingOrders.has(order.id) ? 'Atualizando...' : 'Cancelar'}
+                                </button>
+                            )}
+                        </div>
+                        {['pending', 'kitchen', 'in_delivery'].includes(order.status) && (
+                            <button
+                                className="btn btn-edit-order"
+                                onClick={() => {
+                                    document.getElementById('editPopup').style.display = 'flex';
+                                    loadOrderForEdit(order.id);
+                                }}
+                                disabled={updatingOrders.has(order.id)}
+                            >
+                                <span className="edit-icon">✏️</span>
+                                Editar Pedido
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+
+            const KanbanColumn = ({ title, orders, status }) => (
+                <div className={`kanban-column ${status}`}>
+                    <div className="column-header">
+                        <h2 className="column-title">
+                            {title}
+                            <span className="column-count">{orders.length}</span>
+                        </h2>
+                    </div>
+                    <div className="column-content">
+                        {orders.map(order => (
+                            <OrderCard
+                                key={order.id}
+                                order={order}
+                                onStatusUpdate={updateOrderStatus}
+                                onEditOrder={(order) => {
+                                    setEditingOrder(order);
+                                    setIsEditing(true);
+                                }}
+                            />
+                        ))}
+                    </div>
+                </div>
+            );
+
+            return (
+                <div className="delivery-dashboard">
+                    <div className="dashboard-header">
+                        <h1 className="dashboard-title">Painel de Entregas</h1>
+                        <button
+                            className="btn btn-primary"
+                            onClick={loadOrders}
+                        >
+                            Atualizar Pedidos
+                        </button>
+                    </div>
+
+                    {error && (
+                        <div className="error">
+                            {error}
+                        </div>
+                    )}
+
+                    {(isLoading || isLoadingMenu) ? (
+                        <div className="loading">Carregando pedidos...</div>
+                    ) : (
+                        <div className="kanban-board">
+                            <KanbanColumn
+                                title="Pendentes"
+                                orders={ordersByStatus.pending}
+                                status="pending"
+                            />
+                            <KanbanColumn
+                                title="Cozinha"
+                                orders={ordersByStatus.kitchen}
+                                status="kitchen"
+                            />
+                            <KanbanColumn
+                                title="Em Entrega"
+                                orders={ordersByStatus.in_delivery}
+                                status="in-delivery"
+                            />
+                            <KanbanColumn
+                                title="Concluídos"
+                                orders={ordersByStatus.completed}
+                                status="completed"
+                            />
+                            <KanbanColumn
+                                title="Cancelados"
+                                orders={ordersByStatus.cancelled}
+                                status="cancelled"
+                            />
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        // Add popup HTML
+        const popupHtml = `
+            <div id="editPopup" class="popup-overlay" onclick="if(event.target === this) closeEditPopup()">
+                <div class="popup-content">
+                    <div class="popup-header">
+                        <h2 class="popup-title">Editar Pedido #<span id="editOrderId"></span></h2>
+                        <button class="close-button" onclick="closeEditPopup()">&times;</button>
+                    </div>
+                    <div id="editContent">
+                        <!-- Content will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Add popup to body
+        document.body.insertAdjacentHTML('beforeend', popupHtml);
+
+        function closeEditPopup() {
+            document.getElementById('editPopup').style.display = 'none';
+        }
+
+        async function loadOrderForEdit(orderId) {
+            const editContent = document.getElementById('editContent');
+            editContent.innerHTML = '<div class="loading">Carregando...</div>';
+            document.getElementById('editOrderId').textContent = orderId;
+
+            try {
+                const response = await fetch(`http://15.228.148.198:8000/api/orders/${orderId}`);
+                if (!response.ok) throw new Error('Failed to fetch order');
+
+                const order = await response.json();
+                displayOrderInPopup(order);
+            } catch (err) {
+                console.error('Error loading order:', err);
+                editContent.innerHTML = '<div class="error">Erro ao carregar o pedido</div>';
+            }
+        }
+
+        function displayOrderInPopup(order) {
+            const editContent = document.getElementById('editContent');
+            editContent.innerHTML = `
+                <div class="order-info">
+                    <div class="info-row">
+                        <span class="info-label">Status</span>
+                        <span>${order.status}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Data</span>
+                        <span>${new Date(order.created_at).toLocaleString()}</span>
+                    </div>
+                </div>
+                <div class="order-details">
+                    <h3 class="section-title">Itens do Pedido</h3>
+                    <div class="items-list">
+                        ${order.items.map(item => `
+                            <div class="item-row">
+                                <div class="item-info">
+                                    <span class="item-name">${item.name}</span>
+                                    <span class="item-quantity">x${item.quantity}</span>
+                                    <span class="item-price">R$ ${(item.price * item.quantity).toFixed(2)}</span>
+                                </div>
+                                ${item.observations ? `<div class="item-obs">${item.observations}</div>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="order-total">
+                        Total: R$ ${order.items.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2)}
+                    </div>
+                </div>
+
+                <form id="editForm" onsubmit="handleEditSubmit(event, ${order.id})">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="order_type">Tipo do Pedido</label>
+                            <select id="order_type" name="order_type" class="form-input" required>
+                                <option value="delivery" ${order.order_type === 'delivery' ? 'selected' : ''}>Delivery</option>
+                                <option value="local" ${order.order_type === 'local' ? 'selected' : ''}>Local</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="table_number">Mesa</label>
+                            <input type="number" id="table_number" name="table_number" class="form-input" value="${order.table_number || ''}" min="1">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="status">Status</label>
+                        <select id="status" name="status" class="form-input" required>
+                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pendente</option>
+                            <option value="kitchen" ${order.status === 'kitchen' ? 'selected' : ''}>Cozinha</option>
+                            <option value="in_delivery" ${order.status === 'in_delivery' ? 'selected' : ''}>Em Entrega</option>
+                            <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Concluído</option>
+                            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelado</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="address">Endereço</label>
+                        <input type="text" id="address" name="address" class="form-input" value="${order.address || ''}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="observations">Observações do Pedido</label>
+                        <textarea id="observations" name="observations" class="form-input" rows="3">${order.observations || ''}</textarea>
+                    </div>
+
+                    <div class="actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditPopup()">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                    </div>
+                </form>
+            `;
+        }
+
+        async function handleEditSubmit(event, orderId) {
+            event.preventDefault();
+            const form = event.target;
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = 'Salvando...';
+
+            try {
+                const response = await fetch(`http://15.228.148.198:8000/api/orders/${orderId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        order_type: form.order_type.value,
+                        table_number: form.table_number.value || null,
+                        status: form.status.value,
+                        address: form.address.value,
+                        observations: form.observations.value,
+                        items: order.items // Preserve existing items
+                    })
+                });
+
+                if (!response.ok) throw new Error('Failed to update order');
+
+                loadOrders(true);
+                closeEditPopup();
+            } catch (err) {
+                console.error('Error updating order:', err);
+                alert('Erro ao salvar alterações');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Salvar Alterações';
+            }
+        }
+
+        ReactDOM.render(
+            <DeliveryDashboard />,
+            document.getElementById('root')
+        );
+    </script>
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>

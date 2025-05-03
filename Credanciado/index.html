@@ -1,209 +1,147 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-  </head>
-  <body>
-    <div class="dashboard-layout">
-      <nav class="sidebar">
-        <div class="nav-content">
-          <div class="brand">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/175904ffd9d120cdbe5cb8b2b76665ec6dcb45b4?placeholderIfAbsent=true"
-              alt="Logo"
-              class="brand-logo"
-            />
-            <h1 class="brand-name">Painel</h1>
-          </div>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/175904ffd9d120cdbe5cb8b2b76665ec6dcb45b4?placeholderIfAbsent=true" alt="Logo" class="brand-logo">
+                    <div class="brand-text">Painel</div>
+                </div>
 
-          <button class="nav-item active" data-page="counter">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/11e80e3a4543b38ee8038e77faf320a659dfc934?placeholderIfAbsent=true"
-              alt=""
-              class="nav-icon"
-            />
-            <span class="nav-label">Bancada</span>
-          </button>
+                <button class="nav-button" data-page="Counter">
+                    <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/11e80e3a4543b38ee8038e77faf320a659dfc934?placeholderIfAbsent=true" alt="Bancada" class="nav-icon">
+                    <span>Bancada</span>
+                </button>
 
-          <button class="nav-item" data-page="delivery">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/c6c5f4e389056eb5244d190abec6759ec82a31b7?placeholderIfAbsent=true"
-              alt=""
-              class="nav-icon"
-            />
-            <span class="nav-label">Entrega</span>
-          </button>
+                <button class="nav-button" data-page="Delivery">
+                    <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/c6c5f4e389056eb5244d190abec6759ec82a31b7?placeholderIfAbsent=true" alt="Entrega" class="nav-icon">
+                    <span>Entrega</span>
+                </button>
 
-          <button class="nav-item" data-page="tables">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2680aabe7a5ed85327be4e13124c03b545e23fd9?placeholderIfAbsent=true"
-              alt=""
-              class="nav-icon"
-            />
-            <span class="nav-label">Mesas</span>
-          </button>
+                <button class="nav-button" data-page="Tables">
+                    <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2680aabe7a5ed85327be4e13124c03b545e23fd9?placeholderIfAbsent=true" alt="Mesas" class="nav-icon">
+                    <span>Mesas</span>
+                </button>
 
-          <button class="nav-item" data-page="scheduled">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2676d411da583fbf6f574f76e09833cafe4de324?placeholderIfAbsent=true"
-              alt=""
-              class="nav-icon"
-            />
-            <span class="nav-label">Agendados</span>
-          </button>
+                <button class="nav-button" data-page="Scheduled">
+                    <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2676d411da583fbf6f574f76e09833cafe4de324?placeholderIfAbsent=true" alt="Agendados" class="nav-icon">
+                    <span>Agendados</span>
+                </button>
 
-          <button class="nav-item" data-page="promotions">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2676d411da583fbf6f574f76e09833cafe4de324?placeholderIfAbsent=true"
-              alt=""
-              class="nav-icon"
-            />
-            <span class="nav-label">Promoções</span>
-          </button>
+                <button class="nav-button" data-page="Promotions">
+                    <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2676d411da583fbf6f574f76e09833cafe4de324?placeholderIfAbsent=true" alt="Promoções" class="nav-icon">
+                    <span>Promoções</span>
+                </button>
 
-          <button class="nav-item" data-page="reports">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true"
-              alt=""
-              class="nav-icon"
-            />
-            <span class="nav-label">Relatórios</span>
-          </button>
+                <button class="nav-button" data-page="Reports">
+                    <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true" alt="Relatórios" class="nav-icon">
+                    <span>Relatórios</span>
+                </button>
 
-          <button class="nav-item" data-page="register">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true"
-              alt=""
-              class="nav-icon"
-            />
-            <span class="nav-label">CADASTROS</span>
-          </button>
+                <button class="nav-button" data-page="Register">
+                    <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true" alt="Cadastros" class="nav-icon">
+                    <span>CADASTROS</span>
+                </button>
 
-          <button class="nav-item" data-page="support">
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true"
-              alt=""
-              class="nav-icon"
-            />
-            <span class="nav-label">SUPORTE</span>
-          </button>
-        </div>
-      </nav>
-
-      <main class="main-content">
-        <!-- Counter View -->
-        <section class="view counter-view active" id="counter-view">
-          <header class="view-header">
-            <h2 class="view-title">Painel de Bancada</h2>
-            <p class="view-description">Gerenciar fluxo de entregas</p>
-
-            <div class="status-indicators">
-              <div class="status-item">
-                <span class="status-dot kitchen"></span>
-                <span class="status-label">Cozinha</span>
-              </div>
-              <div class="status-item">
-                <span class="status-dot pending"></span>
-                <span class="status-label">Pendente</span>
-              </div>
-              <div class="status-item">
-                <span class="status-dot progress"></span>
-                <span class="status-label">Em Andamento</span>
-              </div>
-              <div class="status-item">
-                <span class="status-dot completed"></span>
-                <span class="status-label">Concluído</span>
-              </div>
+                <button class="nav-button" data-page="Support">
+                    <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true" alt="Suporte" class="nav-icon">
+                    <span>SUPORTE</span>
+                </button>
             </div>
-          </header>
+        </div>
 
-          <div class="orders-grid">
-            <!-- Kitchen Section -->
-            <section class="order-section kitchen-section">
-              <header class="section-header">
-                <span class="status-dot kitchen"></span>
-                <h3 class="section-title">Cozinha</h3>
-                <span class="order-count">1 pedido</span>
-              </header>
+    <script>
+        // State management
+        let state = {
+            activePage: 'Counter'
+        };
 
-              <div class="order-list">
-                <article class="order-card">
-                  <header class="order-header">
-                    <h4 class="order-title">John Smith</h4>
-                    <span class="order-time">10:30 AM</span>
-                  </header>
+        // Update active page
+        function setActivePage(page) {
+            state.activePage = page;
+            updateUI();
+        }
 
-                  <div class="order-items">
-                    <p class="order-item">Chicken Burger</p>
-                    <p class="order-item">Fries</p>
-                    <p class="order-item">Coke</p>
-                  </div>
+        // Update UI based on state
+        function updateUI() {
+            document.querySelectorAll('.nav-button').forEach(button => {
+                const page = button.dataset.page;
+                if (page === state.activePage) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        }
 
-                  <hr class="order-divider" />
+        // Drag and drop functionality
+        function initializeDragAndDrop() {
+            const cards = document.querySelectorAll('.order-card');
+            const columns = document.querySelectorAll('.kanban-items');
 
-                  <div class="order-total">
-                    <span>Total:</span>
-                    <span>$25.99</span>
-                  </div>
+            cards.forEach(card => {
+                card.addEventListener('dragstart', (e) => {
+                    card.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', card.dataset.orderId);
+                });
 
-                  <button class="action-button kitchen">
-                    Pronto para Retirada
-                  </button>
-                </article>
-              </div>
-            </section>
+                card.addEventListener('dragend', () => {
+                    card.classList.remove('dragging');
+                });
+            });
 
-            <!-- Pending Section -->
-            <section class="order-section pending-section">
-              <header class="section-header">
-                <span class="status-dot pending"></span>
-                <h3 class="section-title">Pendente</h3>
-                <span class="order-count">1 pedido</span>
-              </header>
+            columns.forEach(column => {
+                column.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    column.classList.add('drag-over');
+                });
 
-              <div class="order-list">
-                <!-- Similar order card structure -->
-              </div>
-            </section>
+                column.addEventListener('dragleave', () => {
+                    column.classList.remove('drag-over');
+                });
 
-            <!-- In Progress Section -->
-            <section class="order-section progress-section">
-              <header class="section-header">
-                <span class="status-dot progress"></span>
-                <h3 class="section-title">Em Andamento</h3>
-                <span class="order-count">1 pedido</span>
-              </header>
+                column.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    column.classList.remove('drag-over');
+                    const orderId = e.dataTransfer.getData('text/plain');
+                    const newStatus = column.parentElement.dataset.status;
 
-              <div class="order-list">
-                <!-- Similar order card structure -->
-              </div>
-            </section>
+                    try {
+                        console.log(`Updating order ${orderId} to status: ${newStatus}`);
+                        const response = await fetch(`http://15.228.148.198:8000/api/orders/${orderId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ status: newStatus })
+                        });
 
-            <!-- Completed Section -->
-            <section class="order-section completed-section">
-              <header class="section-header">
-                <span class="status-dot completed"></span>
-                <h3 class="section-title">Concluído</h3>
-                <span class="order-count">1 pedido</span>
-              </header>
+                        if (!response.ok) {
+                            throw new Error('Failed to update order status');
+                        }
 
-              <div class="order-list">
-                <!-- Similar order card structure -->
-              </div>
-            </section>
-          </div>
-        </section>
+                        console.log('Order status updated successfully');
+                        loadOrders(); // Reload all orders
+                    } catch (err) {
+                        console.error('Error updating order status:', err);
+                        alert('Failed to update order status. Please try again.');
+                    }
+                });
+            });
+        }
 
-        <!-- Other views will be added here -->
-      </main>
-    </div>
-    <script src="script.js"></script>
-  </body>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Initializing dashboard...');
+            updateUI();
+        });
+    </script>
+</body>
 </html>

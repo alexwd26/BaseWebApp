@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Mesas</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../side_bar/styles.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/175904ffd9d120cdbe5cb8b2b76665ec6dcb45b4?placeholderIfAbsent=true" alt="Logo" class="logo-image">
+            <div class="header-title">Painel</div>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <button class="nav-item" data-page="Counter">
+                <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/11e80e3a4543b38ee8038e77faf320a659dfc934?placeholderIfAbsent=true" alt="Bancada" class="nav-icon">
+                <span>Bancada</span>
+            </button>
+            
+            <button class="nav-item" data-page="Delivery">
+                <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/c6c5f4e389056eb5244d190abec6759ec82a31b7?placeholderIfAbsent=true" alt="Entrega" class="nav-icon">
+                <span>Entrega</span>
+            </button>
+            
+            <button class="nav-item active" data-page="Tables">
+                <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2680aabe7a5ed85327be4e13124c03b545e23fd9?placeholderIfAbsent=true" alt="Mesas" class="nav-icon">
+                <span>Mesas</span>
+            </button>
+            
+            <button class="nav-item" data-page="Scheduled">
+                <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2676d411da583fbf6f574f76e09833cafe4de324?placeholderIfAbsent=true" alt="Agendados" class="nav-icon">
+                <span>Agendados</span>
+            </button>
+            
+            <button class="nav-item" data-page="Promotions">
+                <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2676d411da583fbf6f574f76e09833cafe4de324?placeholderIfAbsent=true" alt="Promoções" class="nav-icon">
+                <span>Promoções</span>
+            </button>
+            
+            <button class="nav-item" data-page="Reports">
+                <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true" alt="Relatórios" class="nav-icon">
+                <span>Relatórios</span>
+            </button>
+            
+            <button class="nav-item" data-page="Register">
+                <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true" alt="Cadastros" class="nav-icon">
+                <span>CADASTROS</span>
+            </button>
+            
+            <button class="nav-item" data-page="Support">
+                <img src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true" alt="Suporte" class="nav-icon">
+                <span>SUPORTE</span>
+            </button>
+        </nav>
+    </div>
+
+    <div class="main-content">
+        <!-- Mesas dashboard content will go here -->
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            const pageMap = {
+                'Counter': '/Calculadora/calculator.html',
+                'Delivery': '/Delivery/dashboard.html',
+                'Tables': '/Mesas/dashboard.html',
+                'Scheduled': '/Agendados/dashboard.html',
+                'Promotions': '/Promocoes/dashboard.html',
+                'Reports': '/Relatorios/dashboard.html',
+                'Register': '/Registro_de_item/new-product-dialog.html',
+                'Support': '/Suporte/dashboard.html'
+            };
+
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Navigate to the corresponding page
+                    const page = this.getAttribute('data-page');
+                    const url = pageMap[page];
+                    if (url) {
+                        window.location.href = url;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

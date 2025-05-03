@@ -1,0 +1,396 @@
+:root {
+  --color-primary: #4318d1;
+  --color-primary-dark: #3614a7;
+  --color-white: #ffffff;
+  --color-black: #101010;
+  --color-gray-100: #f8f9fa;
+  --color-gray-200: #e5e7eb;
+  --color-gray-500: #878787;
+  --color-success: #4ade80;
+  --color-warning: #f59e0b;
+  --color-danger: #f43f5e;
+  --color-whatsapp: #25d366;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-full: 9999px;
+}
+
+/* Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-black);
+  background-color: var(--color-gray-100);
+}
+
+/* Layout */
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 174px;
+  background-color: var(--color-white);
+  border-right: 1px solid var(--color-gray-200);
+  flex-shrink: 0;
+}
+
+.sidebar__content {
+  padding: 24px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebar__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar__logo {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+}
+
+.sidebar__title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Navigation Items */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  color: var(--color-black);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  text-align: left;
+}
+
+.nav-item:hover {
+  background-color: var(--color-gray-100);
+}
+
+.nav-item--active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.nav-item__icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Section Header */
+.section-header {
+  margin-bottom: 24px;
+}
+
+.section-header__title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+/* Status Legend */
+.status-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+}
+
+.status-dot--kitchen {
+  background-color: var(--color-warning);
+}
+.status-dot--pending {
+  background-color: var(--color-gray-500);
+}
+.status-dot--progress {
+  background-color: var(--color-success);
+}
+.status-dot--done {
+  background-color: var(--color-primary);
+}
+
+.status-text {
+  color: var(--color-gray-500);
+}
+
+/* Orders Grid */
+.orders-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* Order Column */
+.order-column {
+  background-color: var(--color-gray-100);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.order-column__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.order-column__title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.order-column__count {
+  margin-left: auto;
+  color: var(--color-gray-500);
+}
+
+/* Order Card */
+.order-card {
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-gray-200);
+}
+
+.order-card__header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.order-card__title {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.order-card__time {
+  color: var(--color-gray-500);
+  font-size: 12px;
+}
+
+.order-card__items {
+  margin-bottom: 16px;
+}
+
+.order-card__item {
+  color: var(--color-gray-500);
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+
+.order-card__footer {
+  border-top: 1px solid var(--color-gray-200);
+  padding-top: 12px;
+}
+
+.order-card__total {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+/* Buttons */
+.button {
+  width: 100%;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button--primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.button--primary:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* WhatsApp Integration */
+.whatsapp-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  background-color: var(--color-whatsapp);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.whatsapp-button:hover {
+  transform: scale(1.1);
+}
+
+.whatsapp-button__icon {
+  width: 32px;
+  height: 32px;
+}
+
+.chat-popup {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  width: 300px;
+  box-shadow: var(--shadow-md);
+}
+
+.chat-popup__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.chat-popup__title {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.chat-popup__close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--color-gray-500);
+  cursor: pointer;
+}
+
+.chat-popup__text {
+  color: var(--color-gray-500);
+  margin-bottom: 16px;
+}
+
+.button--whatsapp {
+  background-color: var(--color-whatsapp);
+  color: var(--color-white);
+}
+
+.button--whatsapp:hover {
+  background-color: #128c7e;
+}
+
+/* Responsive Design */
+@media (max-width: 991px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    width: 100%;
+    padding: 16px;
+    z-index: 100;
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.98);
+  }
+
+  .sidebar__content {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 0;
+  }
+
+  .main-content {
+    margin-top: 80px;
+    padding: 16px;
+  }
+
+  .orders-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    padding: 12px;
+  }
+
+  .sidebar__logo {
+    display: none;
+  }
+
+  .orders-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .whatsapp-button {
+    width: 50px;
+    height: 50px;
+    bottom: 16px;
+    right: 16px;
+  }
+
+  .whatsapp-button__icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .chat-popup {
+    width: calc(100% - 32px);
+    right: 16px;
+  }
+}

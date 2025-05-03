@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --color-primary: #4318d1;
+        --color-primary-dark: #3614a7;
+        --color-white: #ffffff;
+        --color-black: #101010;
+        --color-gray-100: #f8f9fa;
+        --color-gray-200: #e5e7eb;
+        --color-gray-500: #878787;
+        --color-success: #4ade80;
+        --color-warning: #f59e0b;
+        --color-danger: #f43f5e;
+        --color-whatsapp: #25d366;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: var(--color-gray-100);
+        color: var(--color-black);
+        line-height: 1.5;
+      }
+
+      .dashboard {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      .sidebar {
+        width: 174px;
+        background-color: var(--color-white);
+        border-right: 1px solid var(--color-gray-200);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar__content {
+        padding: 24px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .sidebar__header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .sidebar__logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+      }
+
+      .nav-button {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border: none;
+        background: transparent;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        width: 100%;
+        text-align: left;
+        color: var(--color-black);
+      }
+
+      .nav-button:hover {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+        transform: translateY(-2px);
+      }
+
+      .nav-button--active {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+      }
+
+      .nav-button__icon {
+        width: 20px;
+        height: 20px;
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 24px;
+        overflow-y: auto;
+      }
+
+      .section-header {
+        margin-bottom: 24px;
+      }
+
+      .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .status-indicators {
+        display: flex;
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      .status-dot--kitchen {
+        background-color: var(--color-warning);
+      }
+      .status-dot--pending {
+        background-color: var(--color-gray-500);
+      }
+      .status-dot--progress {
+        background-color: var(--color-success);
+      }
+      .status-dot--completed {
+        background-color: var(--color-primary);
+      }
+
+      .status-text {
+        color: var(--color-gray-500);
+        font-size: 14px;
+      }
+
+      .orders-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
+
+      .order-column {
+        background-color: var(--color-gray-100);
+        border-radius: 12px;
+        padding: 16px;
+      }
+
+      .order-column__header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .order-column__title {
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .order-column__count {
+        margin-left: auto;
+        color: var(--color-gray-500);
+        font-size: 14px;
+      }
+
+      .order-card {
+        background-color: var(--color-white);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 12px;
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.06);
+        border: 1px solid var(--color-gray-200);
+      }
+
+      .order-card__header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .order-card__title {
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .order-card__time {
+        color: var(--color-gray-500);
+        font-size: 12px;
+      }
+
+      .order-card__items {
+        margin-bottom: 16px;
+      }
+
+      .order-card__item {
+        color: var(--color-gray-500);
+        font-size: 12px;
+        margin-bottom: 4px;
+      }
+
+      .order-card__footer {
+        border-top: 1px solid var(--color-gray-200);
+        padding-top: 12px;
+      }
+
+      .order-card__total {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-weight: 600;
+      }
+
+      .button {
+        width: 100%;
+        padding: 8px;
+        border-radius: 999px;
+        border: none;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .button--primary {
+        background-color: var(--color-primary);
+        color: var(--color-white);
+      }
+
+      .button--primary:hover {
+        background-color: var(--color-primary-dark);
+      }
+
+      .whatsapp-button {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 60px;
+        height: 60px;
+        background-color: var(--color-whatsapp);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        cursor: pointer;
+        transition: transform 0.3s;
+        z-index: 1000;
+      }
+
+      .whatsapp-button:hover {
+        transform: scale(1.1);
+        background-color: #128c7e;
+      }
+
+      .whatsapp-button__icon {
+        width: 32px;
+        height: 32px;
+      }
+
+      .chat-popup {
+        position: fixed;
+        bottom: 100px;
+        right: 24px;
+        background-color: var(--color-white);
+        border-radius: 12px;
+        padding: 16px;
+        width: 300px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+      }
+
+      .chat-popup__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .chat-popup__title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .chat-popup__close {
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: var(--color-gray-500);
+        cursor: pointer;
+      }
+
+      .chat-popup__text {
+        color: var(--color-gray-500);
+        margin-bottom: 16px;
+      }
+
+      .button--whatsapp {
+        background-color: var(--color-whatsapp);
+        color: var(--color-white);
+      }
+
+      .button--whatsapp:hover {
+        background-color: #128c7e;
+      }
+
+      @media (max-width: 991px) {
+        .sidebar {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: auto;
+          width: 100%;
+          z-index: 100;
+          background-color: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(8px);
+        }
+
+        .sidebar__content {
+          flex-direction: row;
+          overflow-x: auto;
+          padding: 16px;
+          gap: 12px;
+        }
+
+        .main-content {
+          margin-top: 80px;
+          padding: 16px;
+        }
+
+        .orders-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 640px) {
+        .sidebar {
+          padding: 12px;
+        }
+
+        .sidebar__logo {
+          display: none;
+        }
+
+        .orders-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .whatsapp-button {
+          width: 50px;
+          height: 50px;
+          bottom: 16px;
+          right: 16px;
+        }
+
+        .whatsapp-button__icon {
+          width: 28px;
+          height: 28px;
+        }
+
+        .chat-popup {
+          width: calc(100% - 32px);
+          right: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard">
+      <nav class="sidebar" role="navigation">
+        <div class="sidebar__content">
+          <div class="sidebar__header">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/175904ffd9d120cdbe5cb8b2b76665ec6dcb45b4?placeholderIfAbsent=true"
+              alt="Dashboard Logo"
+              class="sidebar__logo"
+            />
+            <span>Painel</span>
+          </div>
+
+          <button class="nav-button nav-button--active" aria-current="page">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/11e80e3a4543b38ee8038e77faf320a659dfc934?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span>Bancada</span>
+          </button>
+
+          <button class="nav-button">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/c6c5f4e389056eb5244d190abec6759ec82a31b7?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span>Entrega</span>
+          </button>
+
+          <button class="nav-button">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2680aabe7a5ed85327be4e13124c03b545e23fd9?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span>Mesas</span>
+          </button>
+
+          <button class="nav-button">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2676d411da583fbf6f574f76e09833cafe4de324?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span>Agendados</span>
+          </button>
+
+          <button class="nav-button">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2676d411da583fbf6f574f76e09833cafe4de324?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span>Promoções</span>
+          </button>
+
+          <button class="nav-button">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span>Relatórios</span>
+          </button>
+
+          <button class="nav-button">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span>CADASTROS</span>
+          </button>
+
+          <button class="nav-button">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span>SUPORTE</span>
+          </button>
+        </div>
+      </nav>
+
+      <main class="main-content" role="main">
+        <section class="counter-view">
+          <header class="section-header">
+            <h1 class="section-title">Painel de Bancada</h1>
+            <div
+              class="status-indicators"
+              role="status"
+              aria-label="Status dos pedidos"
+            >
+              <div class="status-indicator">
+                <span class="status-dot status-dot--kitchen"></span>
+                <span class="status-text">Cozinha</span>
+              </div>
+              <div class="status-indicator">
+                <span class="status-dot status-dot--pending"></span>
+                <span class="status-text">Pendente</span>
+              </div>
+              <div class="status-indicator">
+                <span class="status-dot status-dot--progress"></span>
+                <span class="status-text">Em Andamento</span>
+              </div>
+              <div class="status-indicator">
+                <span class="status-dot status-dot--completed"></span>
+                <span class="status-text">Concluído</span>
+              </div>
+            </div>
+          </header>
+
+          <div class="orders-grid">
+            <div class="order-column">
+              <div class="order-column__header">
+                <span class="status-dot status-dot--pending"></span>
+                <h2 class="order-column__title">Pendente</h2>
+                <span class="order-column__count">1 pedido</span>
+              </div>
+              <div class="order-cards">
+                <article class="order-card">
+                  <header class="order-card__header">
+                    <h3 class="order-card__title">Mesa 4</h3>
+                    <time class="order-card__time">14:30</time>
+                  </header>
+                  <div class="order-card__items">
+                    <p class="order-card__item">1x X-Burger Especial</p>
+                    <p class="order-card__item">2x Refrigerante 500ml</p>
+                  </div>
+                  <footer class="order-card__footer">
+                    <div class="order-card__total">
+                      <span>Total:</span>
+                      <span>R$ 42,80</span>
+                    </div>
+                    <button class="button button--primary">
+                      Iniciar Preparo
+                    </button>
+                  </footer>
+                </article>
+              </div>
+            </div>
+
+            <!-- Similar structure for other columns -->
+          </div>
+        </section>
+      </main>
+
+      <a
+        href="#"
+        class="whatsapp-button"
+        aria-label="Iniciar conversa no WhatsApp"
+      >
+        <img
+          src="https://cdn.builder.io/api/v1/image/assets/whatsapp-icon.svg"
+          alt=""
+          class="whatsapp-button__icon"
+        />
+      </a>
+
+      <div class="chat-popup" hidden role="dialog" aria-labelledby="chat-title">
+        <div class="chat-popup__header">
+          <h3 class="chat-popup__title" id="chat-title">Fale Conosco</h3>
+          <button class="chat-popup__close" aria-label="Fechar">×</button>
+        </div>
+        <p class="chat-popup__text">Como podemos ajudar você hoje?</p>
+        <button class="button button--whatsapp">Iniciar Conversa</button>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const whatsappButton = document.querySelector(".whatsapp-button");
+        const chatPopup = document.querySelector(".chat-popup");
+        const closeChat = document.querySelector(".chat-popup__close");
+
+        whatsappButton.addEventListener("click", (e) => {
+          e.preventDefault();
+          chatPopup.hidden = !chatPopup.hidden;
+        });
+
+        closeChat.addEventListener("click", () => {
+          chatPopup.hidden = true;
+        });
+
+        // API Integration
+        async function loadOrders() {
+          try {
+            const response = await fetch(
+              "http://15.228.148.198:8000/api/orders",
+            );
+            if (!response.ok) throw new Error("Failed to fetch orders");
+            const orders = await response.json();
+            // Update UI with orders
+          } catch (error) {
+            console.error("Error loading orders:", error);
+          }
+        }
+
+        // Initial load
+        loadOrders();
+      });
+    </script>
+  </body>
+</html>

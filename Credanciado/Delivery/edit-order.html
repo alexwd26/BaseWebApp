@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Pedido</title>
+    <style>
+        body {
+            font-family: Inter, -apple-system, Roboto, Helvetica, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f3f4f6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+
+        .header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+        }
+
+        .order-info {
+            background: #f9fafb;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-label {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #111827;
+            font-weight: 500;
+        }
+
+        .items-section {
+            margin-bottom: 24px;
+        }
+
+        .items-list {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .item {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .item-details {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .total {
+            text-align: right;
+            font-weight: 600;
+            font-size: 16px;
+            margin-top: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4318d1;
+            box-shadow: 0 0 0 2px rgba(67, 24, 209, 0.1);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background-color: #4318d1;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: #3a14b8;
+        }
+
+        .btn-secondary {
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background-color: #e5e7eb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .error {
+            color: #ef4444;
+            background: #fee2e2;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loading" class="loading">Carregando pedido...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        <div id="content" style="display: none;">
+            <div class="header">
+                <h1 class="title">Pedido #<span id="orderId"></span></h1>
+            </div>
+
+            <div class="order-info">
+                <div class="info-row">
+                    <span class="info-label">Status</span>
+                    <span id="orderStatus" class="info-value"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Data</span>
+                    <span id="orderDate" class="info-value"></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Criado por</span>
+                    <span id="orderCreator" class="info-value"></span>
+                </div>
+            </div>
+
+            <div class="items-section">
+                <div class="items-list" id="itemsList"></div>
+                <div class="total" id="orderTotal"></div>
+            </div>
+
+            <form id="editForm">
+                <div class="form-group">
+                    <label class="form-label" for="status">Status</label>
+                    <select id="status" name="status" class="form-input" required>
+                        <option value="pending">Pendente</option>
+                        <option value="kitchen">Cozinha</option>
+                        <option value="in_delivery">Em Entrega</option>
+                        <option value="completed">Concluído</option>
+                        <option value="cancelled">Cancelado</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="address">Endereço de Entrega</label>
+                    <input type="text" id="address" name="address" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="observations">Observações</label>
+                    <textarea id="observations" name="observations" class="form-input" rows="3"></textarea>
+                </div>
+
+                <div class="actions">
+                    <button type="button" class="btn btn-secondary" onclick="window.close()">Cancelar</button>
+                    <button type="submit" id="saveButton" class="btn btn-primary">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentOrder = null;
+        const elements = {
+            loading: document.getElementById('loading'),
+            error: document.getElementById('error'),
+            content: document.getElementById('content'),
+            form: document.getElementById('editForm'),
+            saveButton: document.getElementById('saveButton')
+        };
+
+        let orderId = null;
+
+        // Listen for the order ID from the dashboard
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'orderData') {
+                orderId = event.data.orderId;
+                loadOrder();
+            }
+        });
+
+        async function loadOrder() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            console.log('Loading order with ID:', orderId);
+
+            if (!orderId) {
+                console.error('No order ID found in URL');
+                elements.loading.style.display = 'none';
+                elements.error.textContent = 'ID do pedido não encontrado';
+                elements.error.style.display = 'block';
+                return;
+            }
+
+            try {
+                console.log('Fetching order data...');
+                const response = await fetch(`http://15.228.148.198:8000/api/orders/${orderId}`);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Order data received:', data);
+
+                if (!data) {
+                    throw new Error('No data received from server');
+                }
+
+                currentOrder = data;
+                displayOrder();
+
+                elements.loading.style.display = 'none';
+                elements.content.style.display = 'block';
+            } catch (err) {
+                console.error('Error loading order:', err);
+                elements.loading.style.display = 'none';
+                elements.error.textContent = `Erro ao carregar o pedido: ${err.message}`;
+                elements.error.style.display = 'block';
+            }
+        }
+
+        // Initialize immediately when page loads
+        document.addEventListener('DOMContentLoaded', loadOrder);
+
+        function displayOrder() {
+            console.log('Displaying order:', currentOrder);
+
+            // Basic info with null checks
+            document.getElementById('orderId').textContent = currentOrder.id || 'N/A';
+            document.getElementById('orderStatus').textContent = currentOrder.status || 'Pendente';
+            document.getElementById('orderDate').textContent = currentOrder.created_at ?
+                new Date(currentOrder.created_at).toLocaleString() : 'N/A';
+            document.getElementById('orderCreator').textContent = currentOrder.created_by || 'Sistema';
+
+            // Display items with error handling
+            const itemsList = document.getElementById('itemsList');
+            itemsList.innerHTML = '';
+            let total = 0;
+
+            console.log('Processing items:', currentOrder.items);
+
+            if (currentOrder.items && Array.isArray(currentOrder.items) && currentOrder.items.length > 0) {
+                currentOrder.items.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'item';
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+
+                    itemElement.innerHTML = `
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-details">
+                            ${item.quantity}x · R$ ${item.price.toFixed(2)} = R$ ${itemTotal.toFixed(2)}
+                            ${item.observations ? `<br>${item.observations}` : ''}
+                        </div>
+                    `;
+                    itemsList.appendChild(itemElement);
+                });
+            }
+
+            document.getElementById('orderTotal').textContent = `Total: R$ ${total.toFixed(2)}`;
+
+            // Set form values
+            document.getElementById('status').value = currentOrder.status;
+            document.getElementById('address').value = currentOrder.address || '';
+            document.getElementById('observations').value = currentOrder.observations || '';
+        }
+
+        elements.form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            elements.saveButton.disabled = true;
+            elements.saveButton.textContent = 'Salvando...';
+
+            try {
+                const response = await fetch(
+                    `http://15.228.148.198:8000/api/orders/${currentOrder.id}`,
+                    {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            status: document.getElementById('status').value,
+                            address: document.getElementById('address').value,
+                            observations: document.getElementById('observations').value,
+                            items: currentOrder.items
+                        })
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to update order');
+
+                window.opener.postMessage({ type: 'orderUpdated' }, '*');
+                window.close();
+            } catch (err) {
+                console.error('Error updating order:', err);
+                elements.error.textContent = 'Erro ao salvar alterações';
+                elements.error.style.display = 'block';
+                elements.saveButton.disabled = false;
+                elements.saveButton.textContent = 'Salvar Alterações';
+            }
+        });
+
+        // Initialize - wait for message from dashboard
+        console.log('Waiting for order data...');
+    </script>
+</body>
+</html>

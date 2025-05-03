@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="dashboard">
+      <nav class="sidebar">
+        <div class="sidebar__content">
+          <div class="sidebar__header">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/175904ffd9d120cdbe5cb8b2b76665ec6dcb45b4?placeholderIfAbsent=true"
+              alt="Logo"
+              class="sidebar__logo"
+            />
+            <h1 class="sidebar__title">Painel</h1>
+          </div>
+
+          <button class="nav-button nav-button--active" data-page="counter">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/11e80e3a4543b38ee8038e77faf320a659dfc934?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span class="nav-button__text">Bancada</span>
+          </button>
+
+          <button class="nav-button" data-page="delivery">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/c6c5f4e389056eb5244d190abec6759ec82a31b7?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span class="nav-button__text">Entrega</span>
+          </button>
+
+          <button class="nav-button" data-page="tables">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2680aabe7a5ed85327be4e13124c03b545e23fd9?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span class="nav-button__text">Mesas</span>
+          </button>
+
+          <button class="nav-button" data-page="scheduled">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2676d411da583fbf6f574f76e09833cafe4de324?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span class="nav-button__text">Agendados</span>
+          </button>
+
+          <button class="nav-button" data-page="promotions">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/2676d411da583fbf6f574f76e09833cafe4de324?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span class="nav-button__text">Promoções</span>
+          </button>
+
+          <button class="nav-button" data-page="reports">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span class="nav-button__text">Relatórios</span>
+          </button>
+
+          <button class="nav-button" data-page="register">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span class="nav-button__text">CADASTROS</span>
+          </button>
+
+          <button class="nav-button" data-page="support">
+            <img
+              src="https://cdn.builder.io/api/v1/image/assets/020f8460746343078277cf776774b32b/5278d51e4694dc12a570105ea5ae8fd75380a52b?placeholderIfAbsent=true"
+              alt=""
+              class="nav-button__icon"
+            />
+            <span class="nav-button__text">SUPORTE</span>
+          </button>
+        </div>
+      </nav>
+
+      <main class="main-content">
+        <section class="counter-view" id="counterView">
+          <header class="section-header">
+            <h2 class="section-title">Painel de Bancada</h2>
+            <div class="status-indicators">
+              <div class="status-indicator">
+                <span class="status-dot status-dot--kitchen"></span>
+                <span class="status-text">Cozinha</span>
+              </div>
+              <div class="status-indicator">
+                <span class="status-dot status-dot--pending"></span>
+                <span class="status-text">Pendente</span>
+              </div>
+              <div class="status-indicator">
+                <span class="status-dot status-dot--progress"></span>
+                <span class="status-text">Em Andamento</span>
+              </div>
+              <div class="status-indicator">
+                <span class="status-dot status-dot--completed"></span>
+                <span class="status-text">Concluído</span>
+              </div>
+            </div>
+          </header>
+
+          <div class="orders-grid">
+            <div class="order-column">
+              <div class="order-column__header">
+                <span class="status-dot status-dot--pending"></span>
+                <h3 class="order-column__title">Pendente</h3>
+                <span class="order-column__count">1 pedido</span>
+              </div>
+              <div class="order-cards">
+                <article class="order-card">
+                  <header class="order-card__header">
+                    <h4 class="order-card__title">Mesa 4</h4>
+                    <time class="order-card__time">14:30</time>
+                  </header>
+                  <div class="order-card__items">
+                    <p class="order-card__item">1x X-Burger Especial</p>
+                    <p class="order-card__item">2x Refrigerante 500ml</p>
+                  </div>
+                  <footer class="order-card__footer">
+                    <div class="order-card__total">
+                      <span>Total:</span>
+                      <span>R$ 42,80</span>
+                    </div>
+                    <button class="button button--primary">
+                      Iniciar Preparo
+                    </button>
+                  </footer>
+                </article>
+              </div>
+            </div>
+
+            <!-- Similar structure for other columns -->
+          </div>
+        </section>
+      </main>
+
+      <a href="#" class="whatsapp-button" aria-label="Abrir WhatsApp">
+        <img
+          src="https://cdn.builder.io/api/v1/image/assets/whatsapp-icon.svg"
+          alt=""
+          class="whatsapp-button__icon"
+        />
+      </a>
+
+      <div class="chat-popup" hidden>
+        <div class="chat-popup__header">
+          <h3 class="chat-popup__title">Fale Conosco</h3>
+          <button class="chat-popup__close" aria-label="Fechar">×</button>
+        </div>
+        <p class="chat-popup__text">Como podemos ajudar você hoje?</p>
+        <button class="button button--whatsapp">Iniciar Conversa</button>
+      </div>
+    </div>
+
+    <script>
+      // Basic interaction handlers
+      document.addEventListener("DOMContentLoaded", () => {
+        // Navigation
+        const navButtons = document.querySelectorAll(".nav-button");
+        navButtons.forEach((button) => {
+          button.addEventListener("click", () => {
+            navButtons.forEach((btn) =>
+              btn.classList.remove("nav-button--active"),
+            );
+            button.classList.add("nav-button--active");
+          });
+        });
+
+        // WhatsApp chat
+        const whatsappButton = document.querySelector(".whatsapp-button");
+        const chatPopup = document.querySelector(".chat-popup");
+        const closeChat = document.querySelector(".chat-popup__close");
+
+        whatsappButton.addEventListener("click", (e) => {
+          e.preventDefault();
+          chatPopup.hidden = !chatPopup.hidden;
+        });
+
+        closeChat.addEventListener("click", () => {
+          chatPopup.hidden = true;
+        });
+
+        // API Integration
+        async function loadOrders() {
+          try {
+            const response = await fetch(
+              "http://15.228.148.198:8000/api/orders",
+            );
+            const orders = await response.json();
+            // Update UI with orders
+          } catch (error) {
+            console.error("Error loading orders:", error);
+          }
+        }
+
+        // Initial load
+        loadOrders();
+      });
+    </script>
+  </body>
+</html>
