@@ -58,12 +58,110 @@
     </div>
 
     <div class="main-content">
-        <!-- Mesas dashboard content will go here -->
+        <div class="tables-section">
+            <div class="tables-header">
+                <div class="header-main">
+                    <h1>Gerenciamento de Mesas</h1>
+                    <button id="add-table-btn" class="add-table-btn">
+                        <span class="plus-icon">+</span>
+                        Adicionar Mesa
+                    </button>
+                </div>
+                <div id="loading-indicator" class="loading-indicator hidden">Carregando...</div>
+                <div id="error-message" class="error-message hidden"></div>
+            </div>
+            <div id="tables-grid" class="tables-grid"></div>
+        </div>
+
+        <div class="dashboard-section">
+            <h2>Visão Geral</h2>
+            <div class="dashboard-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Mesas Ocupadas</h3>
+                        <div class="stat-value" id="occupied-tables">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Mesas Disponíveis</h3>
+                        <div class="stat-value" id="available-tables">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total de Mesas</h3>
+                        <div class="stat-value" id="total-tables">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Edit Dialog -->
+    <div id="edit-dialog" class="edit-dialog hidden">
+        <div class="edit-dialog-content">
+            <div class="edit-dialog-header">
+                <h3>Editar Mesa <span id="edit-table-number"></span></h3>
+                <button class="close-dialog-btn">×</button>
+            </div>
+            <div class="edit-dialog-body">
+                <div class="form-group">
+                    <label for="edit-status">Status:</label>
+                    <select id="edit-status" class="edit-status-select">
+                        <option value="disponivel">Disponível</option>
+                        <option value="ocupada">Ocupada</option>
+                        <option value="reservada">Reservada</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-order">Número do Pedido:</label>
+                    <input type="number" id="edit-order" class="edit-order-input" placeholder="Número do pedido">
+                </div>
+            </div>
+            <div class="edit-dialog-footer">
+                <button class="cancel-btn">Cancelar</button>
+                <button class="save-btn">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Template -->
+    <template id="table-template">
+        <div class="table-card">
+            <div class="table-header">
+                <div class="table-number-badge"></div>
+                <button class="delete-table-btn" title="Remover Mesa">×</button>
+            </div>
+            <div class="table-content">
+                <div class="table-info">
+                    <div class="status-indicator">
+                        <span class="status-dot"></span>
+                        <span class="status-text"></span>
+                    </div>
+                    <div class="table-details">
+                        <div class="order-info"></div>
+                        <div class="time-info"></div>
+                    </div>
+                </div>
+                <button class="edit-table-btn" title="Editar Mesa">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M11.5 2.5L13.5 4.5M3 13H5L12 6L10 4L3 11V13Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </template>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const navItems = document.querySelectorAll('.nav-item');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const errorMessage = document.getElementById('error-message');
+            const tablesGrid = document.getElementById('tables-grid');
+            const tableTemplate = document.getElementById('table-template');
+            const editDialog = document.getElementById('edit-dialog');
+            const editTableNumber = document.getElementById('edit-table-number');
+            const editStatus = document.getElementById('edit-status');
+            const editOrder = document.getElementById('edit-order');
+            let currentEditingTable = null;
+
             const pageMap = {
                 'Counter': '/Calculadora/calculator.html',
                 'Delivery': '/Delivery/dashboard.html',
@@ -75,15 +173,192 @@
                 'Support': '/Suporte/dashboard.html'
             };
 
+            async function getNextTableNumber() {
+                try {
+                    const response = await fetch('http://15.228.148.198:8000/api/tables/');
+                    if (!response.ok) {
+                        throw new Error('Falha ao carregar mesas');
+                    }
+                    const tables = await response.json();
+                    const numbers = tables.map(t => parseInt(t.table_number)).filter(n => !isNaN(n));
+                    return numbers.length > 0 ? Math.max(...numbers) + 1 : 1;
+                } catch (error) {
+                    console.error('Error getting next table number:', error);
+                    return 1;
+                }
+            }
+
+            function updateDashboardStats(tables) {
+                const occupiedCount = tables.filter(t => t.status === 'ocupada').length;
+                const availableCount = tables.filter(t => t.status === 'disponivel').length;
+                const totalCount = tables.length;
+
+                document.getElementById('occupied-tables').textContent = occupiedCount;
+                document.getElementById('available-tables').textContent = availableCount;
+                document.getElementById('total-tables').textContent = totalCount;
+            }
+
+            async function createTable() {
+                try {
+                    const nextNumber = await getNextTableNumber();
+                    const response = await fetch('http://15.228.148.198:8000/api/tables/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            table_number: nextNumber,
+                            status: 'disponivel',
+                            order_id: null
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Falha ao criar mesa');
+                    }
+
+                    await loadTables();
+                } catch (error) {
+                    console.error('Error creating table:', error);
+                    errorMessage.textContent = 'Erro ao criar mesa. Por favor, tente novamente.';
+                    errorMessage.classList.remove('hidden');
+                }
+            }
+
+            async function deleteTable(tableId) {
+                try {
+                    const response = await fetch(`http://15.228.148.198:8000/api/tables/${tableId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Falha ao remover mesa');
+                    }
+
+                    await loadTables();
+                } catch (error) {
+                    console.error('Error deleting table:', error);
+                    errorMessage.textContent = 'Erro ao remover mesa. Por favor, tente novamente.';
+                    errorMessage.classList.remove('hidden');
+                }
+            }
+
+            async function updateTable(tableId, updates) {
+                try {
+                    const response = await fetch(`http://15.228.148.198:8000/api/tables/${tableId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(updates)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Falha ao atualizar mesa');
+                    }
+
+                    await loadTables();
+                    hideEditDialog();
+                } catch (error) {
+                    console.error('Error updating table:', error);
+                    errorMessage.textContent = 'Erro ao atualizar mesa. Por favor, tente novamente.';
+                    errorMessage.classList.remove('hidden');
+                }
+            }
+
+            function showEditDialog(table) {
+                currentEditingTable = table;
+                editTableNumber.textContent = table.table_number;
+                editStatus.value = table.status;
+                editOrder.value = table.order_id || '';
+                editDialog.classList.remove('hidden');
+            }
+
+            function hideEditDialog() {
+                editDialog.classList.add('hidden');
+                currentEditingTable = null;
+            }
+
+            async function loadTables() {
+                loadingIndicator.classList.remove('hidden');
+                errorMessage.classList.add('hidden');
+                tablesGrid.innerHTML = '';
+
+                try {
+                    const response = await fetch('http://15.228.148.198:8000/api/tables/');
+                    if (!response.ok) {
+                        throw new Error('Falha ao carregar as mesas');
+                    }
+                    const tables = await response.json();
+                    
+                    updateDashboardStats(tables);
+                    
+                    tables.forEach(table => {
+                        const tableElement = tableTemplate.content.cloneNode(true);
+                        const tableCard = tableElement.querySelector('.table-card');
+                        
+                        tableCard.querySelector('.table-number-badge').textContent = table.table_number;
+                        
+                        const statusText = tableCard.querySelector('.status-text');
+                        const statusDot = tableCard.querySelector('.status-dot');
+                        const statusMap = {
+                            'disponivel': 'Disponível',
+                            'ocupada': 'Ocupada',
+                            'reservada': 'Reservada'
+                        };
+                        statusText.textContent = statusMap[table.status] || table.status;
+                        statusDot.classList.add(`status-${table.status.toLowerCase()}`);
+                        
+                        const orderInfo = tableCard.querySelector('.order-info');
+                        const timeInfo = tableCard.querySelector('.time-info');
+                        
+                        if (table.order_id) {
+                            orderInfo.textContent = `Pedido #${table.order_id}`;
+                            if (table.timestamp) {
+                                const time = new Date(table.timestamp).toLocaleTimeString('pt-BR', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                timeInfo.textContent = `Desde ${time}`;
+                            }
+                        } else {
+                            orderInfo.textContent = 'Sem pedido';
+                            timeInfo.style.display = 'none';
+                        }
+                        
+                        tableCard.setAttribute('data-table-id', table.id);
+                        
+                        const deleteBtn = tableCard.querySelector('.delete-table-btn');
+                        deleteBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            if (confirm('Tem certeza que deseja remover esta mesa?')) {
+                                deleteTable(table.id);
+                            }
+                        });
+                        
+                        const editBtn = tableCard.querySelector('.edit-table-btn');
+                        editBtn.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            showEditDialog(table);
+                        });
+                        
+                        tablesGrid.appendChild(tableElement);
+                    });
+                } catch (error) {
+                    console.error('Error loading tables:', error);
+                    errorMessage.textContent = 'Erro ao carregar as mesas. Por favor, tente novamente.';
+                    errorMessage.classList.remove('hidden');
+                } finally {
+                    loadingIndicator.classList.add('hidden');
+                }
+            }
+
+            // Navigation
             navItems.forEach(item => {
                 item.addEventListener('click', function() {
-                    // Remove active class from all items
                     navItems.forEach(nav => nav.classList.remove('active'));
-                    
-                    // Add active class to clicked item
                     this.classList.add('active');
                     
-                    // Navigate to the corresponding page
                     const page = this.getAttribute('data-page');
                     const url = pageMap[page];
                     if (url) {
@@ -91,6 +366,28 @@
                     }
                 });
             });
+
+            // Edit Dialog Events
+            document.querySelector('.close-dialog-btn').addEventListener('click', hideEditDialog);
+            document.querySelector('.cancel-btn').addEventListener('click', hideEditDialog);
+            document.querySelector('.save-btn').addEventListener('click', () => {
+                if (currentEditingTable) {
+                    const updates = {
+                        status: editStatus.value,
+                        order_id: editOrder.value ? parseInt(editOrder.value) : null
+                    };
+                    updateTable(currentEditingTable.id, updates);
+                }
+            });
+
+            // Add Table Button Event
+            document.getElementById('add-table-btn').addEventListener('click', createTable);
+
+            // Initial Load
+            loadTables();
+            
+            // Auto Refresh
+            setInterval(loadTables, 30000);
         });
     </script>
 </body>
