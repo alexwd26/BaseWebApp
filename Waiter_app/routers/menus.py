@@ -10,35 +10,38 @@ router = APIRouter()
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-class MenuItem(BaseModel):
+class MenuItemBase(BaseModel):
     name: str
     description: Optional[str] = None
     price: float
     category: str
     image: Optional[str] = None
-    discount: Optional[float] = 0
+    discount: Optional[float] = None
 
-class MenuItemOut(MenuItem):
+class MenuItemCreate(MenuItemBase):
+    pass
+
+class MenuItem(MenuItemBase):
     id: int
 
-@router.get("/", response_model=List[MenuItemOut])
+@router.get("/", response_model=List[MenuItem])
 def list_menu_items(category: Optional[str] = Query(None)):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
     if category:
-        cursor.execute("SELECT * FROM menu_items WHERE category = %s", (category,))
+        cursor.execute("SELECT id, name, description, price, category, image, discount FROM menu_items WHERE category = %s", (category,))
     else:
-        cursor.execute("SELECT * FROM menu_items")
+        cursor.execute("SELECT id, name, description, price, category, image, discount FROM menu_items")
     items = cursor.fetchall()
     cursor.close()
     conn.close()
     return items
 
-@router.get("/{item_id}", response_model=MenuItemOut)
+@router.get("/{item_id}", response_model=MenuItem)
 def get_menu_item(item_id: int):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM menu_items WHERE id = %s", (item_id,))
+    cursor.execute("SELECT id, name, description, price, category, image, discount FROM menu_items WHERE id = %s", (item_id,))
     item = cursor.fetchone()
     cursor.close()
     conn.close()
@@ -46,8 +49,8 @@ def get_menu_item(item_id: int):
         raise HTTPException(status_code=404, detail="Item not found")
     return item
 
-@router.post("/", response_model=MenuItemOut)
-def create_menu_item(item: MenuItem):
+@router.post("/", response_model=MenuItem)
+def create_menu_item(item: MenuItemCreate):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(
@@ -60,14 +63,14 @@ def create_menu_item(item: MenuItem):
     conn.close()
     return {"id": item_id, **item.dict()}
 
-@router.post("/register-item", response_model=MenuItemOut)
+@router.post("/register-item", response_model=MenuItem)
 def register_item(
     name: str = Form(...),
     description: str = Form(""),
     price: float = Form(...),
     category: str = Form(...),
-    discount: float = Form(0),
-    image: UploadFile = File(...)
+    image: UploadFile = File(...),
+    discount: Optional[float] = Form(None)
 ):
     file_path = os.path.join(UPLOAD_DIR, image.filename)
     with open(file_path, "wb") as buffer:
@@ -84,18 +87,10 @@ def register_item(
     cursor.close()
     conn.close()
 
-    return {
-        "id": item_id,
-        "name": name,
-        "description": description,
-        "price": price,
-        "category": category,
-        "image": image.filename,
-        "discount": discount,
-    }
+    return {"id": item_id, "name": name, "description": description, "price": price, "category": category, "image": image.filename, "discount": discount}
 
-@router.put("/{item_id}", response_model=MenuItemOut)
-def update_menu_item(item_id: int, item: MenuItem):
+@router.put("/{item_id}", response_model=MenuItem)
+def update_menu_item(item_id: int, item: MenuItemBase):
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute(
@@ -116,6 +111,20 @@ def delete_menu_item(item_id: int):
     cursor.close()
     conn.close()
     return {"message": "Item deleted"}
+
+@router.post("/bulk")
+def bulk_add_menu_items(items: List[MenuItemCreate]):
+    conn = get_db()
+    cursor = conn.cursor()
+    for item in items:
+        cursor.execute(
+            "INSERT INTO menu_items (name, description, price, category, image, discount) VALUES (%s, %s, %s, %s, %s, %s)",
+            (item.name, item.description, item.price, item.category, item.image, item.discount)
+        )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": f"{len(items)} items inserted successfully"}
 
 @router.get("/ping")
 def ping_server():
