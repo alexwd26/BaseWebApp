@@ -1,102 +1,161 @@
-from fastapi import APIRouter, HTTPException, Depends, Body
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from db import get_db
-from typing import List, Optional
+from typing import List, Optional, Dict
 import datetime
-from sqlalchemy.orm import Session
 
 router = APIRouter()
 
-# Update Pydantic models to match DB schema
 class Promocao(BaseModel):
-    id: int
-    name: str
-    description: str 
-    discount_percentage: float
-    start_date: datetime.date
-    end_date: datetime.date
-    active: bool = True
-    image_url: Optional[str] = None
+    title: str
+    description: Optional[str] = None
+    image: Optional[str] = None
+    active: Optional[bool] = True
+    start_date: Optional[datetime.date] = None
+    end_date: Optional[datetime.date] = None
+    discount_value: float = 0
+    is_quantity_discount: bool = False
+    price: float = 0
+    items: List[int] = []  # New field to store item IDs
 
-class PromocaoCreate(BaseModel):
-    name: str
-    description: str 
-    discount_percentage: float
-    start_date: datetime.date
-    end_date: datetime.date
-    item_ids: List[int]
-
-@router.get("/promocoes", response_model=List[schemas.Promocao])
-def list_promocoes(db: Session = Depends(...)):
-    promocoes = db.query(models.Promocao).filter(models.Promocao.active == True).all()
-    return promocoes
-
-@router.post("/promocoes")
-async def create_promocao(promo: PromocaoCreate, db: Session = Depends(...)):
-    # Create new promotion
-    db_promo = models.Promocao(
-        name=promo.name,
-        description=promo.description,
-        discount_percentage=promo.discount_percentage,
-        start_date=promo.start_date,
-        end_date=promo.end_date,
-        active=True
+@router.get("/promocoes", response_model=List[Dict])
+def list_promocoes():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        SELECT p.*, pi.item_id FROM promotions p
+        LEFT JOIN promotion_items pi ON p.id=pi.promotion_id
+        WHERE p.active=True
+        """,
+        ()
     )
     
-    # Add items to the promotion
-    items = [db.query(models.Item).filter(models.Item.id == item_id).first() 
-             for item_id in promo.item_ids]
+    rows = cursor.fetchall()
+    result = []
     
-    if not all(items):
-        raise HTTPException(status_code=404, detail="One or more items not found")
+    # Convert the raw tuples into dictionaries
+    for row in rows:
+        if not hasattr(result, 'append'):
+            result.append({})
         
-    db_promo.items = [item for item in items if item]
-    db.add(db_promo)
-    db.commit()
-    db.refresh(db_promo)
+        # Create a dictionary from the row
+        item_dict = {
+            "id": row[0],
+            "title": row[1],
+            "description": row[2],
+            "image": row[3],
+            "active": bool(row[4]),
+            "start_date": row[5],
+            "end_date": row[6],
+            "discount_value": float(row[7]),
+            "is_quantity_discount": bool(row[8]),
+            "price": float(row[9]),
+            "items": []
+        }
+        
+        # If it's the first item, initialize
+        if len(result) == 0:
+            result.append(item_dict)
+        else:
+            # Update existing dictionary
+            result[-1] = item_dict
+        
+        # Add items to the promotion
+        if row[10] is not None:  # Assuming item_id is at index 10
+            result[-1]["items"].append(row[10])
     
-    return schemas.Promocao.from_orm(db_promo)
+    cursor.close()
+    conn.close()
+    return result
+
+@router.post("/promocoes")
+def create_promocao(promo: Promocao):
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Insert promotion first
+    cursor.execute(
+        "INSERT INTO promotions (title, description, image, active, start_date, end_date, discount_value, is_quantity_discount, price) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+        (promo.title, promo.description, promo.image, promo.active,
+         promo.start_date, promo.end_date, promo.discount_value,
+         promo.is_quantity_discount, promo.price)
+    )
+    promotion_id = cursor.lastrowid
+    
+    # Insert items
+    if promo.items:
+        item_ids = [(promotion_id, item) for item in promo.items]
+        cursor.executemany(
+            "INSERT INTO promotion_items (promotion_id, item_id) VALUES (%s, %s)",
+            item_ids
+        )
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Promotion created successfully"}
 
 @router.put("/promocoes/{promo_id}")
-async def update_promocao(promo_id: int, promo: PromocaoCreate, db: Session = Depends(...)):
-    db_promo = db.query(models.Promocao).filter(models.Promocao.id == promo_id).first()
+def update_promocao(promo_id: int, promo: Promocao):
+    conn = get_db()
+    cursor = conn.cursor()
     
-    if not db_promo:
-        raise HTTPException(status_code=404, detail="Promotion not found")
-        
-    # Update fields
-    db_promo.name = promo.name
-    db_promo.description = promo.description
-    db_promo.discount_percentage = promo.discount_percentage
-    db_promo.start_date = promo.start_date
-    db_promo.end_date = promo.end_date
+    # Update promotion
+    cursor.execute(
+        """
+        UPDATE promotions SET title=%s, description=%s, image=%s, active=%s,
+                            start_date=%s, end_date=%s, discount_value=%s,
+                            is_quantity_discount=%s, price=%s WHERE id=%s
+        """,
+        (promo.title, promo.description, promo.image, promo.active,
+         promo.start_date, promo.end_date, promo.discount_value,
+         promo.is_quantity_discount, promo.price, promo_id)
+    )
     
     # Clear existing items
-    db_promo.items.clear()
+    cursor.execute("DELETE FROM promotion_items WHERE promotion_id=%s", (promo_id,))
     
-    # Add new items
-    items = [db.query(models.Item).filter(models.Item.id == item_id).first() 
-             for item_id in promo.item_ids]
+    # Insert new items
+    if promo.items:
+        item_ids = [(promo_id, item) for item in promo.items]
+        cursor.executemany(
+            "INSERT INTO promotion_items (promotion_id, item_id) VALUES (%s, %s)",
+            item_ids
+        )
     
-    if not all(items):
-        raise HTTPException(status_code=404, detail="One or more items not found")
-        
-    db_promo.items.extend([item for item in items if item])
-    
-    db.commit()
-    db.refresh(db_promo)
-    
-    return schemas.Promocao.from_orm(db_promo)
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Promotion updated successfully"}
 
 @router.delete("/promocoes/{promo_id}")
-async def delete_promocao(promo_id: int, db: Session = Depends(...)):
-    db_promo = db.query(models.Promocao).filter(models.Promocao.id == promo_id).first()
+def delete_promocao(promo_id: int):
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE promotions SET active = FALSE WHERE id = %s", (promo_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "Promotion deactivated"}
+
+# New endpoint to add items to a promotion after creation
+@router.post("/promocoes/{promo_id}/items")
+def add_promotion_items(promo_id: int, item_ids: List[int]):
+    conn = get_db()
+    cursor = conn.cursor()
     
-    if not db_promo:
-        raise HTTPException(status_code=404, detail="Promotion not found")
-        
-    # Soft delete
-    db_promo.active = False
-    db.commit()
+    # Delete existing items (if you want to replace)
+    cursor.execute("DELETE FROM promotion_items WHERE promotion_id=%s", (promo_id,))
     
-    return {"message": "Promotion deactivated successfully"}
+    # Insert new items
+    if item_ids:
+        cursor.executemany(
+            "INSERT INTO promotion_items (promotion_id, item_id) VALUES (%s, %s)",
+            [(promo_id, item) for item in item_ids]
+        )
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": f"{len(item_ids)} items added to promotion {promo_id}"}
