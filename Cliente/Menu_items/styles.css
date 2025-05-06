@@ -1,0 +1,162 @@
+.menu-items {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100vw;
+  min-height: screen;
+  background-color: #fff;
+  font-family: Inter;
+  padding: 24px;
+  gap: 24px;
+}
+
+.menu-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #101010;
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  border: 2px solid #fe8c0020;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  font-size: 14px;
+  color: #878787;
+}
+
+.error-message {
+  width: 100%;
+  padding: 16px;
+  background-color: #fff4f4;
+  border: 1px solid #f14141;
+  border-radius: 8px;
+  color: #f14141;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 24px;
+  width: 100%;
+}
+
+.menu-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 6px 6px 60px 0px rgba(0, 0, 0, 0.04);
+  padding: 16px;
+  gap: 16px;
+}
+
+.image-container {
+  position: relative;
+}
+
+.menu-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.favorite-button {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background-color: #fff;
+  padding: 8px;
+  border-radius: 9999px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.favorite-button:hover {
+  transform: scale(1.1);
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.item-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #101010;
+  margin: 0;
+}
+
+.item-details {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.metrics {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rating,
+.distance {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rating-value,
+.distance-value {
+  font-size: 12px;
+  color: #101010;
+}
+
+.price {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fe8c00;
+}
+
+@media (min-width: 641px) and (max-width: 991px) {
+  .menu-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .menu-grid {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+}

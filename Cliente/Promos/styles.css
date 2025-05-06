@@ -1,0 +1,114 @@
+body {
+    margin: 0;
+    font-family: sans-serif;
+}
+
+.banner-container {
+    background-color: #f0f0f0; /* Fallback background color */
+    color: #333; /* Adjust text color */
+    display: flex;
+    flex-direction: column; /* Stack content vertically */
+    align-items: center; /* Center items horizontally */
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+    overflow: hidden; /* To contain text within the image bounds */
+    position: relative; /* For absolute positioning of text and background image */
+    min-height: 200px; /* Adjust minimum height as needed */
+}
+
+.banner-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover; /* Cover the entire container */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat;
+    z-index: -1; /* Place the image behind the content */
+    opacity: 0.7; /* Adjust opacity of the background image if needed */
+    transition: opacity 0.5s ease-in-out, background-image 0.5s ease-in-out; /* For smooth transitions */
+}
+
+.banner-content {
+    width: 80%; /* Adjust width of the text content */
+    max-width: 600px; /* Maximum width for the text content */
+    z-index: 1; /* Ensure text is above the background image */
+}
+
+.promotional-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    color: inherit; /* Inherit text color from .banner-container */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Optional: text shadow for better readability */
+}
+
+.promotional-text {
+    font-size: 1.1em;
+    line-height: 1.5;
+    color: inherit; /* Inherit text color */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); /* Optional: text shadow */
+}
+
+.accent-bar {
+    background-color: orange; /* Adjust accent color */
+    height: 3px;
+    width: 40%;
+    margin: 15px auto;
+    z-index: 1; /* Ensure bar is above the background image */
+}
+
+.promo-image {
+    display: none !important; /* Hide the inline image element */
+}
+
+.loading::before {
+    content: 'Carregando...';
+    display: block;
+    font-style: italic;
+    color: #777;
+    z-index: 1;
+}
+
+.error::before {
+    content: 'Erro ao carregar ofertas.';
+    display: block;
+    color: red;
+    font-weight: bold;
+    z-index: 1;
+}
+
+.fade-in {
+    opacity: 1;
+    transition: opacity 0.5s ease-in;
+}
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 0.5s ease-out;
+}
+
+/* Mobile-specific adjustments (optional, but can be refined) */
+@media (max-width: 600px) {
+    .banner-container {
+        padding: 15px;
+        min-height: 150px; /* Adjust minimum height for smaller screens */
+    }
+
+    .promotional-title {
+        font-size: 1.3em;
+        margin-bottom: 0.3em;
+    }
+
+    .promotional-text {
+        font-size: 1em;
+    }
+
+    .accent-bar {
+        width: 60%;
+        margin: 10px auto;
+    }
+}

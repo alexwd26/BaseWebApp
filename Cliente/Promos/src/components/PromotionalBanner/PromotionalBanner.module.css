@@ -1,0 +1,30 @@
+.bannerContainer {
+  border-color: rgba(254, 140, 0, 0.1);
+  border-style: solid;
+  border-width: 1px;
+  display: flex;
+  padding-left: 16px;
+  padding-top: 16px;
+  padding-bottom: 17px;
+  align-items: center;
+  gap: 138px;
+  font-size: 20px;
+  color: rgba(16, 16, 16, 1);
+  font-weight: 700;
+  justify-content: flex-end;
+}
+
+.promotionalText {
+  align-self: stretch;
+  margin: auto 0;
+}
+
+.accentBar {
+  border-radius: 2px;
+  background-color: rgba(254, 140, 0, 1);
+  align-self: stretch;
+  display: flex;
+  min-height: 4px;
+  margin: auto 0;
+  gap: 8px;
+}
