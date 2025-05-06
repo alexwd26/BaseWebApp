@@ -4,7 +4,6 @@ from db import get_db
 from typing import List, Optional
 import datetime
 from sqlalchemy.orm import Session
-from ApiProcess.API.Waiter_app import models, schemas
 
 router = APIRouter()
 
