@@ -1,68 +1,103 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Body
 from pydantic import BaseModel
 from db import get_db
 from typing import List, Optional
 import datetime
+from sqlalchemy.orm import Session
+from ApiProcess.API.Waiter_app import models, schemas
 
 router = APIRouter()
 
+# Update Pydantic models to match DB schema
 class Promocao(BaseModel):
-    title: str
-    description: Optional[str] = None
-    image: Optional[str] = None
-    active: Optional[bool] = True
-    start_date: Optional[datetime.date] = None
-    end_date: Optional[datetime.date] = None
+    id: int
+    name: str
+    description: str 
+    discount_percentage: float
+    start_date: datetime.date
+    end_date: datetime.date
+    active: bool = True
+    image_url: Optional[str] = None
 
-@router.get("/promocoes", response_model=List[dict])
-def list_promocoes():
-    conn = get_db()
-    cursor = conn.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM promotions WHERE active = TRUE")
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return rows
+class PromocaoCreate(BaseModel):
+    name: str
+    description: str 
+    discount_percentage: float
+    start_date: datetime.date
+    end_date: datetime.date
+    item_ids: List[int]
+
+@router.get("/promocoes", response_model=List[schemas.Promocao])
+def list_promocoes(db: Session = Depends(...)):
+    promocoes = db.query(models.Promocao).filter(models.Promocao.active == True).all()
+    return promocoes
 
 @router.post("/promocoes")
-def create_promocao(promo: Promocao):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        INSERT INTO promotions (title, description, image, active, start_date, end_date)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        """,
-        (promo.title, promo.description, promo.image, promo.active, promo.start_date, promo.end_date)
+async def create_promocao(promo: PromocaoCreate, db: Session = Depends(...)):
+    # Create new promotion
+    db_promo = models.Promocao(
+        name=promo.name,
+        description=promo.description,
+        discount_percentage=promo.discount_percentage,
+        start_date=promo.start_date,
+        end_date=promo.end_date,
+        active=True
     )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"message": "Promotion created successfully"}
+    
+    # Add items to the promotion
+    items = [db.query(models.Item).filter(models.Item.id == item_id).first() 
+             for item_id in promo.item_ids]
+    
+    if not all(items):
+        raise HTTPException(status_code=404, detail="One or more items not found")
+        
+    db_promo.items = [item for item in items if item]
+    db.add(db_promo)
+    db.commit()
+    db.refresh(db_promo)
+    
+    return schemas.Promocao.from_orm(db_promo)
 
 @router.put("/promocoes/{promo_id}")
-def update_promocao(promo_id: int, promo: Promocao):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute(
-        """
-        UPDATE promotions
-        SET title=%s, description=%s, image=%s, active=%s, start_date=%s, end_date=%s
-        WHERE id = %s
-        """,
-        (promo.title, promo.description, promo.image, promo.active, promo.start_date, promo.end_date, promo_id)
-    )
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"message": "Promotion updated successfully"}
+async def update_promocao(promo_id: int, promo: PromocaoCreate, db: Session = Depends(...)):
+    db_promo = db.query(models.Promocao).filter(models.Promocao.id == promo_id).first()
+    
+    if not db_promo:
+        raise HTTPException(status_code=404, detail="Promotion not found")
+        
+    # Update fields
+    db_promo.name = promo.name
+    db_promo.description = promo.description
+    db_promo.discount_percentage = promo.discount_percentage
+    db_promo.start_date = promo.start_date
+    db_promo.end_date = promo.end_date
+    
+    # Clear existing items
+    db_promo.items.clear()
+    
+    # Add new items
+    items = [db.query(models.Item).filter(models.Item.id == item_id).first() 
+             for item_id in promo.item_ids]
+    
+    if not all(items):
+        raise HTTPException(status_code=404, detail="One or more items not found")
+        
+    db_promo.items.extend([item for item in items if item])
+    
+    db.commit()
+    db.refresh(db_promo)
+    
+    return schemas.Promocao.from_orm(db_promo)
 
 @router.delete("/promocoes/{promo_id}")
-def delete_promocao(promo_id: int):
-    conn = get_db()
-    cursor = conn.cursor()
-    cursor.execute("UPDATE promotions SET active = FALSE WHERE id = %s", (promo_id,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-    return {"message": "Promotion deactivated"}
+async def delete_promocao(promo_id: int, db: Session = Depends(...)):
+    db_promo = db.query(models.Promocao).filter(models.Promocao.id == promo_id).first()
+    
+    if not db_promo:
+        raise HTTPException(status_code=404, detail="Promotion not found")
+        
+    # Soft delete
+    db_promo.active = False
+    db.commit()
+    
+    return {"message": "Promotion deactivated successfully"}
