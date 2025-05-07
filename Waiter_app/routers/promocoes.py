@@ -22,6 +22,8 @@ class Promocao(BaseModel):
 def list_promocoes():
     conn = get_db()
     cursor = conn.cursor()
+    # ... existing code ...
+
     cursor.execute(
         """
         SELECT p.*, pi.item_id FROM promotions p
@@ -48,9 +50,10 @@ def list_promocoes():
             "active": bool(row[4]),
             "start_date": row[5],
             "end_date": row[6],
-            "discount_value": float(row[7]),
+            # Handle discount_value and price conversion
+            "discount_value": float(row[7]) if row[7] is not None else 0.0,
             "is_quantity_discount": bool(row[8]),
-            "price": float(row[9]),
+            "price": float(row[9]) if row[9] is not None else 0.0,
             "items": []
         }
         
