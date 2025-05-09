@@ -22,55 +22,47 @@ class Promocao(BaseModel):
 def list_promocoes():
     conn = get_db()
     cursor = conn.cursor()
-    # ... existing code ...
 
     cursor.execute(
         """
-        SELECT p.*, pi.item_id FROM promotions p
-        LEFT JOIN promotion_items pi ON p.id=pi.promotion_id
-        WHERE p.active=True
+        SELECT p.id, p.title, p.description, p.image, p.active,
+               p.start_date, p.end_date, p.discount_value,
+               p.is_quantity_discount, p.price, pi.item_id
+        FROM promotions p
+        LEFT JOIN promotion_items pi ON p.id = pi.promotion_id
+        WHERE p.active = True
         """,
         ()
     )
-    
+
     rows = cursor.fetchall()
-    result = []
-    
-    # Convert the raw tuples into dictionaries
+    result: Dict[int, Dict] = {}  # Use a dictionary to store promotions by ID
+
     for row in rows:
-        if not hasattr(result, 'append'):
-            result.append({})
-        
-        # Create a dictionary from the row
-        item_dict = {
-            "id": row[0],
-            "title": row[1],
-            "description": row[2],
-            "image": row[3],
-            "active": bool(row[4]),
-            "start_date": row[5],
-            "end_date": row[6],
-            # Handle discount_value and price conversion
-            "discount_value": float(row[7]) if row[7] is not None else 0.0,
-            "is_quantity_discount": bool(row[8]),
-            "price": float(row[9]) if row[9] is not None else 0.0,
-            "items": []
-        }
-        
-        # If it's the first item, initialize
-        if len(result) == 0:
-            result.append(item_dict)
-        else:
-            # Update existing dictionary
-            result[-1] = item_dict
-        
-        # Add items to the promotion
-        if row[10] is not None:  # Assuming item_id is at index 10
-            result[-1]["items"].append(row[10])
-    
+        promo_id = row[0]
+        item_id = row[10]
+
+        if promo_id not in result:
+            result[promo_id] = {
+                "id": promo_id,
+                "title": row[1],
+                "description": row[2],
+                "image": row[3],
+                "active": bool(row[4]),
+                "start_date": row[5],
+                "end_date": row[6],
+                "discount_value": float(row[7]) if row[7] is not None else 0.0,
+                "is_quantity_discount": bool(row[8]),
+                "price": float(row[9]) if row[9] is not None else 0.0,
+                "items": []
+            }
+
+        if item_id is not None and item_id not in result[promo_id]["items"]:
+            result[promo_id]["items"].append(item_id)
+
     cursor.close()
     conn.close()
-    return result
+    return list(result.values())
 
 @router.post("/promocoes")
 def create_promocao(promo: Promocao):
