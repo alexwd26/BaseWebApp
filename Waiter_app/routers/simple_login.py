@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from db import get_db
-import jwt
+import uuid
 import datetime
 
 router = APIRouter()
 
-SECRET_KEY = "your-secret-key"
-ALGORITHM = "HS256"
+# In-memory token store for demo (token: expiry)
+token_store = {}
+TOKEN_EXPIRY_HOURS = 2
 
 class CustomerLoginRequest(BaseModel):
     phone: str
@@ -48,10 +49,9 @@ def complete_login(data: CustomerCompleteRequest):
     cursor.close()
     conn.close()
 
-    token = jwt.encode({
-        "sub": data.phone,
-        "role": "customer",
-        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=2)
-    }, SECRET_KEY, algorithm=ALGORITHM)
+    # Generate a random token and store its expiry
+    token = str(uuid.uuid4())
+    expiry = datetime.datetime.utcnow() + datetime.timedelta(hours=TOKEN_EXPIRY_HOURS)
+    token_store[token] = expiry
 
     return {"access_token": token, "token_type": "bearer"}
