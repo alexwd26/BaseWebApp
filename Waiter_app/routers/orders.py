@@ -105,6 +105,7 @@ def list_orders(order_type: Optional[str] = None, status: Optional[str] = None):
 def update_order_status(order_id: int, update: OrderStatusUpdate):
     """
     Update the status of an order by its ID. Authentication is not required.
+    Allowed statuses: 'pending', 'kitchen', 'in_delivery', 'completed', 'cancelled'.
     Args:
         order_id (int): The ID of the order to update.
         update (OrderStatusUpdate): The new status for the order.
@@ -113,7 +114,7 @@ def update_order_status(order_id: int, update: OrderStatusUpdate):
     Raises:
         HTTPException: If the status is invalid.
     """
-    if update.status not in ["pending", "kitchen", "ready", "complete"]:
+    if update.status not in ["pending", "kitchen", "in_delivery", "completed", "cancelled"]:
         raise HTTPException(status_code=400, detail="Invalid status")
 
     conn = get_db()
