@@ -103,9 +103,16 @@ def list_orders(order_type: Optional[str] = None, status: Optional[str] = None):
 
 @router.patch("/{order_id}")
 def update_order_status(order_id: int, update: OrderStatusUpdate):
-    if update.role not in ["admin", "motoboy"]:
-        raise HTTPException(status_code=403, detail="Only admin or motoboy can update status")
-
+    """
+    Update the status of an order by its ID. Authentication is not required.
+    Args:
+        order_id (int): The ID of the order to update.
+        update (OrderStatusUpdate): The new status for the order.
+    Returns:
+        dict: A message indicating the update result.
+    Raises:
+        HTTPException: If the status is invalid.
+    """
     if update.status not in ["pending", "kitchen", "ready", "complete"]:
         raise HTTPException(status_code=400, detail="Invalid status")
 
