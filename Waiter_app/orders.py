@@ -12,6 +12,9 @@ class OrderRequest(BaseModel):
     address: Optional[str] = None
     items: str
     role: Optional[str] = None  # added for frontend auth
+    created_by: Optional[str] = None
+    observation: Optional[str] = None
+    created_at: Optional[str] = None  # ISO format, optional
 
 class OrderStatusUpdate(BaseModel):
     status: str  # 'pending', 'kitchen', 'ready', 'complete'
@@ -45,15 +48,20 @@ def create_order(order: OrderRequest):
     cursor = conn.cursor()
 
     query = """
-        INSERT INTO orders (order_type, table_number, address, items, status)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO orders (order_type, table_number, address, items, status, created_by, observation, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
+    import datetime
+    now = datetime.datetime.now().isoformat(timespec='seconds')
     cursor.execute(query, (
         order.order_type,
         order.table_number,
         order.address,
         order.items,
-        "pending"
+        "pending",
+        order.created_by,
+        order.observation,
+        order.created_at or now
     ))
     conn.commit()
     order_id = cursor.lastrowid
