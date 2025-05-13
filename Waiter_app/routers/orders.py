@@ -134,3 +134,24 @@ def update_order_status(order_id: int, update: OrderStatusUpdate):
     cursor.close()
     conn.close()
     return {"message": f"Order {order_id} status updated to {update.status}"}
+
+@router.delete("/", status_code=200)
+def delete_all_orders(role: str):
+    """
+    Delete all orders from the database. Only allowed for admin role.
+    Args:
+        role (str): The role of the user making the request. Must be 'admin'.
+    Returns:
+        dict: A message indicating the result.
+    Raises:
+        HTTPException: If the role is not 'admin'.
+    """
+    if role != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can delete all orders")
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM orders")
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "All orders deleted"}
