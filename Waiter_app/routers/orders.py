@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
 from db import get_db
+import datetime
 
 router = APIRouter()
 
@@ -12,6 +13,9 @@ class OrderRequest(BaseModel):
     address: Optional[str] = None
     items: str
     role: Optional[str] = None  # added for frontend auth
+    created_by: Optional[str] = None
+    observation: Optional[str] = None
+    created_at: Optional[str] = None  # ISO format, optional
 
 class OrderStatusUpdate(BaseModel):
     status: str  # 'pending', 'kitchen', 'ready', 'complete'
@@ -44,16 +48,22 @@ def create_order(order: OrderRequest):
     conn = get_db()
     cursor = conn.cursor()
 
+    # Set created_at to now if not provided
+    created_at = order.created_at or datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
     query = """
-        INSERT INTO orders (order_type, table_number, address, items, status)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO orders (order_type, table_number, address, items, status, created_by, created_at, observation)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
     cursor.execute(query, (
         order.order_type,
         order.table_number,
         order.address,
         order.items,
-        "pending"
+        "pending",
+        order.created_by,
+        created_at,
+        order.observation
     ))
     conn.commit()
     order_id = cursor.lastrowid
