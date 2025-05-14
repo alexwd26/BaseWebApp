@@ -26,3 +26,13 @@ def health_check():
         return {"status": "healthy"}
     except Exception:
         return {"status": "unhealthy"}
+
+@router.get("/version")
+def get_version():
+    conn = get_db()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT version FROM app_version LIMIT 1")
+    version = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return {"version": version["version"]}

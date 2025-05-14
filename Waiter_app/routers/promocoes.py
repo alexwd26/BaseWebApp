@@ -87,6 +87,7 @@ def create_promocao(promo: Promocao):
         )
     
     conn.commit()
+    increment_version()
     cursor.close()
     conn.close()
     return {"message": "Promotion created successfully"}
@@ -120,6 +121,7 @@ def update_promocao(promo_id: int, promo: Promocao):
         )
     
     conn.commit()
+    increment_version()
     cursor.close()
     conn.close()
     return {"message": "Promotion updated successfully"}
@@ -130,6 +132,7 @@ def delete_promocao(promo_id: int):
     cursor = conn.cursor()
     cursor.execute("UPDATE promotions SET active = FALSE WHERE id = %s", (promo_id,))
     conn.commit()
+    increment_version()
     cursor.close()
     conn.close()
     return {"message": "Promotion deactivated"}
@@ -151,6 +154,15 @@ def add_promotion_items(promo_id: int, item_ids: List[int]):
         )
     
     conn.commit()
+    increment_version()
     cursor.close()
     conn.close()
     return {"message": f"{len(item_ids)} items added to promotion {promo_id}"}
+
+def increment_version():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE app_version SET version = version + 1")
+    conn.commit()
+    cursor.close()
+    conn.close()
