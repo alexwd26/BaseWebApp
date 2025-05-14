@@ -1,81 +1,31 @@
-from flask import Flask, jsonify
+# main.py
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routers import auth, menus, orders, users, admin, health, tables, images, simple_login, order_status, promocoes, pizzas # Changed import name
 
-app = Flask(__name__)
+app = FastAPI()
 
-# --- General API Endpoints ---
+# Allow frontend connections (adjust origins in production)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
+# Include all routers
+app.include_router(auth.router, prefix="/api/auth")
+app.include_router(menus.router, prefix="/api/menus")
+app.include_router(orders.router, prefix="/api/orders")
+app.include_router(users.router, prefix="/api/users")
+app.include_router(admin.router, prefix="/api/admin")
+app.include_router(admin.router, prefix="/api/health")
+app.include_router(tables.router, prefix="/api/tables")
+app.include_router(simple_login.router, prefix="/api")
+app.include_router(images.router, prefix="/api/images")
+app.include_router(order_status.router, prefix="/api/order_status")
+app.include_router(promocoes.router, prefix="/api/promos")
+app.include_router(pizzas.router, prefix="/api/pizzas") 
 
-# --- Restaurant Endpoints ---
-
-@app.route('/api/restaurants', methods=['GET'])
-def get_restaurants():
-    """
-    Lists all restaurants.
-    """
-    # In a real application, you would fetch data from a database.
-    restaurants_data = [
-        {"id": 1, "name": "Pizza Place A", "cuisine": "Italian"},
-        {"id": 2, "name": "Burger Joint B", "cuisine": "American"}
-    ]
-    return jsonify(restaurants_data)
-
-@app.route('/api/restaurants/<int:restaurant_id>', methods=['GET'])
-def get_restaurant(restaurant_id):
-    """
-    Retrieves details of a specific restaurant.
-    """
-    # In a real application, you would fetch data from a database based on restaurant_id.
-    restaurant_data = {"id": restaurant_id, "name": f"Restaurant {restaurant_id}", "cuisine": "Example"}
-    return jsonify(restaurant_data)
-
-@app.route('/api/restaurants', methods=['POST'])
-# In a real application, you would implement authentication and authorization here.
-# Example: @jwt_required()
-# Example: @has_role('admin')
-def create_restaurant():
-    """
-    Creates a new restaurant (admin only).
-    """
-    # In a real application, you would:
-    # 1. Get data from the request body (e.g., using request.get_json()).
-    # 2. Validate the data.
-    # 3. Save the new restaurant to the database.
-    # 4. Return a success response (e.g., status code 201).
-    new_restaurant = {"name": "New Restaurant", "cuisine": "Another Type"}
-    return jsonify({"message": "Restaurant created successfully", "restaurant": new_restaurant}), 201
-
-# ... (other endpoints) ...
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
-
-
-
-@app.route('/', methods=['GET'])
-def home():
-    """
-    A simple welcome message for the API root.
-    """
-    return jsonify({"message": "Welcome to the Food Delivery Service API!"})
-
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    """
-    Endpoint to check the health and status of the API.
-    """
-    return jsonify({"status": "OK", "message": "API is up and running"})
-
-# --- Test Endpoint ---
-
-@app.route('/api/test', methods=['GET'])
-def test_endpoint():
-    """
-    A simple test endpoint to verify basic API functionality.
-    """
-    data = {"message": "This is a test endpoint response.", "timestamp": "now"}
-    return jsonify(data)
-
-if __name__ == '__main__':
-    # In a real application, you would configure the host and port properly.
-    # For development, running on localhost:5000 is common.
-    app.run(debug=True, host='0.0.0.0', port=5000)
+# User roles: admin, waiter, customer, motoboy

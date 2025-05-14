@@ -1,8 +1,35 @@
+# main.py
 from fastapi import FastAPI
-from auth import router as auth_router
-from orders import router as orders_router
+from fastapi.middleware.cors import CORSMiddleware
+from routers import auth, menus, orders, users, admin, health, tables, images, simple_login, order_status, promocoes, pizzas, menu_options # Changed import name
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
-app.include_router(auth_router)
-app.include_router(orders_router)
+# Allow frontend connections (adjust origins in production)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include all routers
+app.include_router(auth.router, prefix="/api/auth")
+app.include_router(menus.router, prefix="/api/menus")
+app.include_router(orders.router, prefix="/api/orders")
+app.include_router(users.router, prefix="/api/users")
+app.include_router(admin.router, prefix="/api/admin")
+app.include_router(admin.router, prefix="/api/health")
+app.include_router(tables.router, prefix="/api/tables")
+app.include_router(simple_login.router, prefix="/api")
+app.include_router(images.router, prefix="/api/images")
+app.include_router(order_status.router, prefix="/api/order_status")
+app.include_router(promocoes.router, prefix="/api/promos")
+app.include_router(pizzas.router, prefix="/api/pizzas") 
+app.include_router(pizzas.router, prefix="/api/menu-options") 
+# User roles: admin, waiter, customer, motoboy
+
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
+# Now /static/version.json is accessible
