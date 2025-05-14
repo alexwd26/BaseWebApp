@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import auth, menus, orders, users, admin, health, tables, images, simple_login, order_status, promocoes, pizzas, menu_options # Changed import name
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
@@ -29,3 +30,6 @@ app.include_router(promocoes.router, prefix="/api/promos")
 app.include_router(pizzas.router, prefix="/api/pizzas") 
 app.include_router(pizzas.router, prefix="/api/menu-options") 
 # User roles: admin, waiter, customer, motoboy
+
+app.mount("/static", StaticFiles(directory="uploads"), name="static")
+# Now /static/version.json is accessible
