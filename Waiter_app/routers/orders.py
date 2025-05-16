@@ -85,7 +85,7 @@ def get_order_by_id(order_id: int):
     return order
 
 @router.get("/")
-def list_orders(order_type: Optional[str] = None, status: Optional[str] = None):
+def list_orders(order_type: Optional[str] = None, status: Optional[str] = None, created_by: Optional[str] = None):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
 
@@ -99,6 +99,9 @@ def list_orders(order_type: Optional[str] = None, status: Optional[str] = None):
     if status:
         filters.append("status = %s")
         params.append(status)
+    if created_by:
+        filters.append("LOWER(TRIM(created_by)) = LOWER(TRIM(%s))")
+        params.append(created_by)
 
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
