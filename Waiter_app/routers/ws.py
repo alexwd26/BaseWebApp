@@ -4,13 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 ws_router = APIRouter()
 
 # Allow CORS for local dev
-ws_router.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Restrict in production!
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# ws_router.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],  # Restrict in production!
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 # Store connected clients
 clients = []
