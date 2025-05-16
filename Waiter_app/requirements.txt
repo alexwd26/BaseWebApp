@@ -8,3 +8,4 @@ pydantic
 python-dotenv
 aiofiles
 python-jose
+websocket

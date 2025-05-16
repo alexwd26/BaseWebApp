@@ -4,6 +4,9 @@ from pydantic import BaseModel
 from typing import Optional, List
 from db import get_db
 import datetime
+from .ws import broadcast_notification  # Import the broadcast utility
+import asyncio
+import json
 
 router = APIRouter()
 
@@ -69,6 +72,24 @@ def create_order(order: OrderRequest):
     order_id = cursor.lastrowid
     cursor.close()
     conn.close()
+
+    # Broadcast the new order as JSON to all websocket clients
+    try:
+        msg = json.dumps({
+            "event": "order_created",
+            "order_id": order_id,
+            "created_by": order.created_by or 'usuário',
+            "items": order.items,
+            "status": "pending",
+            "order_type": order.order_type,
+            "table_number": order.table_number,
+            "address": order.address,
+            "created_at": created_at,
+            "observation": order.observation
+        })
+        asyncio.create_task(broadcast_notification(msg))
+    except Exception as e:
+        print(f"WebSocket broadcast failed: {e}")
 
     return {"order_id": order_id, "message": "Order placed successfully"}
 
@@ -136,6 +157,18 @@ def update_order_status(order_id: int, update: OrderStatusUpdate):
     conn.commit()
     cursor.close()
     conn.close()
+
+    # Broadcast the update as JSON to all websocket clients
+    try:
+        msg = json.dumps({
+            "event": "order_updated",
+            "order_id": order_id,
+            "status": update.status
+        })
+        asyncio.create_task(broadcast_notification(msg))
+    except Exception as e:
+        print(f"WebSocket broadcast failed: {e}")
+
     return {"message": f"Order {order_id} status updated to {update.status}"}
 
 @router.delete("/", status_code=200)
