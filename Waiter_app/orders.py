@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
 from db import get_db
+import datetime
 
 router = APIRouter()
 
@@ -12,6 +13,9 @@ class OrderRequest(BaseModel):
     address: Optional[str] = None
     items: str
     role: Optional[str] = None  # added for frontend auth
+    created_by: Optional[str] = None
+    observation: Optional[str] = None
+    created_at: Optional[str] = None  # ISO format, optional
 
 class OrderStatusUpdate(BaseModel):
     status: str  # 'pending', 'kitchen', 'ready', 'complete'
@@ -44,16 +48,22 @@ def create_order(order: OrderRequest):
     conn = get_db()
     cursor = conn.cursor()
 
+    # Set created_at to now if not provided
+    created_at = order.created_at or datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
     query = """
-        INSERT INTO orders (order_type, table_number, address, items, status)
-        VALUES (%s, %s, %s, %s, %s)
+        INSERT INTO orders (order_type, table_number, address, items, status, created_by, created_at, observation)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """
     cursor.execute(query, (
         order.order_type,
         order.table_number,
         order.address,
         order.items,
-        "pending"
+        "pending",
+        order.created_by,
+        created_at,
+        order.observation
     ))
     conn.commit()
     order_id = cursor.lastrowid
@@ -75,7 +85,7 @@ def get_order_by_id(order_id: int):
     return order
 
 @router.get("/")
-def list_orders(order_type: Optional[str] = None, status: Optional[str] = None):
+def list_orders(order_type: Optional[str] = None, status: Optional[str] = None, created_by: Optional[str] = None):
     conn = get_db()
     cursor = conn.cursor(dictionary=True)
 
@@ -89,6 +99,9 @@ def list_orders(order_type: Optional[str] = None, status: Optional[str] = None):
     if status:
         filters.append("status = %s")
         params.append(status)
+    if created_by:
+        filters.append("LOWER(TRIM(created_by)) = LOWER(TRIM(%s))")
+        params.append(created_by)
 
     if filters:
         base_query += " WHERE " + " AND ".join(filters)
@@ -124,3 +137,24 @@ def update_order_status(order_id: int, update: OrderStatusUpdate):
     cursor.close()
     conn.close()
     return {"message": f"Order {order_id} status updated to {update.status}"}
+
+@router.delete("/", status_code=200)
+def delete_all_orders(role: str):
+    """
+    Delete all orders from the database. Only allowed for admin role.
+    Args:
+        role (str): The role of the user making the request. Must be 'admin'.
+    Returns:
+        dict: A message indicating the result.
+    Raises:
+        HTTPException: If the role is not 'admin'.
+    """
+    if role != "admin":
+        raise HTTPException(status_code=403, detail="Only admin can delete all orders")
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM orders")
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return {"message": "All orders deleted"}
